@@ -9,7 +9,11 @@ const app = express();
 
 
 // MIDDLEWARES - for all the routes
-app.use(morgan('dev'));
+console.log(process.env.NODE_ENV)
+if(process.env.NODE_ENV === 'development'){
+    app.use(morgan('dev'));
+}
+
 app.use(express.json());
 
 // Define the route for the Public folder to be accessible
