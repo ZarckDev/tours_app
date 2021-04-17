@@ -48,7 +48,8 @@ const tourSchema = new mongoose.Schema({
     images: [String],
     createdAt: {
         type: Date,
-        default: Date.now() // Mongo converts automatically to string date
+        default: Date.now(), // Mongo converts automatically to string date
+        select: false // when we try to select (in fields limiting), we just hide createdAt
     },
     startDates: [Date]
 });

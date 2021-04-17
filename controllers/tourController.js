@@ -1,5 +1,6 @@
 
 //Model
+const { query } = require('express');
 const Tour = require('../models/tourModel');
 
 
@@ -7,7 +8,84 @@ const Tour = require('../models/tourModel');
 // ROUTES HANDLERS
 exports.getAllTours = async(req, res) => {
     try {
-        const tours = await Tour.find();
+        //1a) FILTERING
+        // remove from query object the excluded fields 'page', 'sort', 'limit', 'fields'
+        // by destructuring, if they are there, the will be set in corresponding variable and not taken under consideration after
+        const { page, sort, limit, fields, ...queryObj } = req.query;
+
+        console.log(page, sort, limit, fields)
+
+        //1b) ADVANCED FILTERING
+        // {difficulty: 'easy', duration: { $gte: 5}}
+        // /api/v1/tours?difficulty=easy&duration[gte]=5
+        // console.log(queryObj); // only missing the $ operator
+        let queryStr = JSON.stringify(queryObj);
+        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`) // match one of the gte, gt, lte, lt words -- "\b" to match the EXACT words, g for multiple times possible
+        //  OR    /\b(gte?|lte?)\b/g
+        //The ? sign means that the previous character, in this case the 'e' letter could or not exists.
+
+        
+        // first way of findind with special query
+        // need to be set in a query variable if we want to chain, because await will take consideration of the first return Promise
+        let query = Tour.find(JSON.parse(queryStr)); // query ==> Query Object with all the methods related (see mongoose documentation under "Query")
+        
+
+        // second way of findind with special query
+        // const query = Tour.find()
+        //     .where('duration')
+        //     .equals(5)
+        //     .where('difficulty')
+        //     .equals('easy')
+
+
+         //2) SORTING
+         // ex : /api/v1/tours?sort=price
+         // ex 2 : /api/v1/tours?sort=-price   => descending order
+        if(sort) {// if we have a query "sort" mentioned
+            // ordering in case there is a tie -- same value
+            // /api/v1/tours?sort=price,ratingsAverage
+            // sort('price ratingsAverage') // add a second field
+            const sortBy = sort.split(',').join(' '); // replace with space for mongoose
+
+            // query = query.sort(req.query.sort) // sort method from Query object (mongoose)
+            query = query.sort(sortBy)
+        } else { // user does not specify sort string
+            query = query.sort('-createdAt') // sort anyway with last created first // !!!!!!! Cause problem in page & limit !!!!!!!! Because everything as the same time and date
+        }
+
+
+        //3) FIELD LIMITING
+        // ex : /api/v1/tours?fields=name,duration,difficulty,price
+        // ex 2 : /api/v1/tours?fields=-name,-duration  (everything excepts name and duration)
+        if(fields) {
+            const selectedFields = fields.split(',').join(' '); // replace ',' with space for mongoose
+            // wait for 'name duration ...'
+            query = query.select(selectedFields)
+        } else {
+            // if we don't have the fields, just do not show the '__v' in the API.
+            // "__v" by mongoDB
+            query = query.select('-__v'); // We take everything excepts "__v" field thanks to the "-"
+        }
+
+
+        //4) PAGINATION (when 1000 documents for example)
+        // ex: /api/v1/tours?page=2&limit=10  ==> displaying page nb 2 with 10 documents max per page
+        // in this case =>  1-10: page 1, 11-20: page 2, 21-30: page 3 .....
+        const pageNb = page * 1 || 1; // convert to number || page 1 by default -- we by default limit, if one day we have 1000 documents...
+        const limitSet = limit * 1 || 100; // 100 documents limit by page by default
+        const skipValue = (pageNb - 1) * limitSet;
+        // query = query.skip(10).limit(10); // skip amount of results that will be skiped
+        query = query.skip(skipValue).limit(limitSet);
+
+        if(page) {
+            const numTours = await Tour.countDocuments(); // returns the number of document Promise
+            if(skipValue >= numTours ) throw new Error('This page does not exist') // goes directly to the catch block
+        }
+
+
+        // EXECUTE QUERY
+        const tours = await query;
+        // our query looks like this at this point : query.sort().select().skip().limit()
 
         res.status(200).json({
             status: 'success',
