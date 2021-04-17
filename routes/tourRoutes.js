@@ -12,6 +12,10 @@ const router = express.Router(); // It's a middleware that is executed before th
 // router.param('id', tourController.checkID); // middleware to check the ID for /:id routes
 
 
+// ROUTES FOR SPECIFIC API REQUESTS
+// run a middleware before getting the tours, in order to define the query in request
+router.route('/top-5-cheap').get(tourController.aliasTopTours, tourController.getAllTours)
+
 // ROUTES
 router.route('/')
     .get(tourController.getAllTours)
