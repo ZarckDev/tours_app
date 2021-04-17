@@ -2,12 +2,19 @@ const dotenv = require('dotenv');
 // Define the env
 dotenv.config({path: './config.env'});
 
+const mongoose = require('mongoose')
+
 const app = require('./app')
 
-// Here is everything not related with Express
 
-// console.log(app.get('env')) // "development" by default set by Express
-// console.log(process.env) // by NodeJS
+const DB_URL = process.env.MONGODB_URL.replace('<password>', process.env.MONGODB_PWD);
+mongoose.connect(DB_URL, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useUnifiedTopology: true
+}).then(conn => console.log('DB connection successful'))
+//TODO Add  catch
 
 
 

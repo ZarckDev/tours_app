@@ -9,13 +9,13 @@ const router = express.Router(); // It's a middleware that is executed before th
 //     console.log(`Tour id is : ${val}`); // val holds the value of "id" parameter
 //     next();
 // })
-router.param('id', tourController.checkID); // middleware to check the ID for /:id routes
+// router.param('id', tourController.checkID); // middleware to check the ID for /:id routes
 
 
 // ROUTES
 router.route('/')
     .get(tourController.getAllTours)
-    .post(tourController.checkBody, tourController.createTour)
+    .post(tourController.createTour)
 
 router.route('/:id')
     .get(tourController.getTour)
