@@ -4,6 +4,8 @@ const morgan = require('morgan'); // Request Logger with details
 
 const AppError = require('./utils/appError');
 
+const globalErrorHandler = require('./controllers/errorController')
+
 const tourRouter = require('./routes/tourRoutes')
 const userRouter = require('./routes/userRoutes')
 
@@ -36,35 +38,15 @@ app.use('/api/v1/users', userRouter) // for this specific route - MOUNTING the r
 // Unknown route middleware handler
 // all for all the verbs(get, post, patch...)
 app.all('*', (req, res, next) => {
-    // res.status(404).json({
-    //     status: 'fail',
-    //     message: `Page not Found -- Cannot find ${req.originalUrl}`
-    // })
-    //create an error instead
-    const err = new Error(`Cannot find ${req.originalUrl} in this server!`);
-    err.status = 'fail';
-    err.statusCode = 404;
 
+    const err = new AppError(`Cannot find ${req.originalUrl} in this server!`, 404);
     next(err); // pass the err in next -- express will now that this is an error!
     // skip all the middleware to go directly to the Error handle
 })
 
 
-// Handle all errors in one place ! 
-app.use((err, req, res, next) => { // this 4 parameters, Express recognize it automatically as Error handling !!!
-    console.log(err.stack); // show where the error happened
-
-    const { statusCode = 500, status = 'error', message } = err; 
-    // get the status code from err sent - 500 as default
-    // status => error or fail from err
-    // get the message from err
-
-    res.status(statusCode).json({
-        status,
-        message 
-    })
-
-})
+// Handle all errors in one place !
+app.use(globalErrorHandler)
 
 // export our Express app
 module.exports = app;
