@@ -16,6 +16,9 @@ const router = express.Router(); // It's a middleware that is executed before th
 // run a middleware before getting the tours, in order to define the query in request
 router.route('/top-5-cheap').get(tourController.aliasTopTours, tourController.getAllTours)
 
+// ROUTES FOR PIPELINE
+router.route('/tour-stats').get(tourController.getTourStats)
+
 // ROUTES
 router.route('/')
     .get(tourController.getAllTours)

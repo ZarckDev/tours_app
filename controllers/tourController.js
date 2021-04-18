@@ -122,3 +122,46 @@ exports.deleteTour = async(req, res) => {
         })
     }  
 }
+
+
+exports.getTourStats = async(req, res) => {
+    try{
+        // agreggate with all the stages (see MongoDB documentation for aggregation Pipeline)
+        const stats = await Tour.aggregate([
+            {
+                $match: { ratingsAverage: { $gte: 4.5 }} // give all tours with rating > 4.5
+            },
+            {
+                $group: {
+                    _id: { $toUpper: '$difficulty'}, //  id for a single stat group -- we can group by this ex: _id: '$difficulty' ==> will group stats by difficulty
+                    // _id: null, // null if we want for all the tours
+                    // _id: '$ratingsAverage',
+                    numTours: { $sum: 1 }, // sum 1 at each aggregation (going through the documents)
+                    numRatings: { $sum: '$ratingsQuantity'},
+                    avgRating: { $avg: '$ratingsAverage'},
+                    avgPrice: { $avg: '$price'},
+                    minPrice: { $min : '$price'},
+                    maxPrice: { $max : '$price'}
+                }
+            },
+            {
+                $sort: { avgPrice : 1} // 1 ---> ascending
+            },
+            // {
+            //     $match: { _id: { $ne: 'EASY'}} // define above
+            // }
+        ])// here we are getting Tours that are ratings greater than 4.5, grouping some statistics by difficulty, ordering by lowerPrice to HighestPrice, and excluding the EASY group from result -- EXAMPLE
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                stats
+            }
+        })
+    } catch(err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
+        })
+    }
+}
