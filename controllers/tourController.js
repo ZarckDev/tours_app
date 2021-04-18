@@ -165,3 +165,60 @@ exports.getTourStats = async(req, res) => {
         })
     }
 }
+
+// Get the amount of tours per month for a specific year
+exports.getMonthlyPlan = async (req, res) => {
+    try{
+        const year = req.params.year * 1 ; // convert to Number
+
+        const plan = await Tour.aggregate([
+            {
+                $unwind: '$startDates' // separates the tour by startDates (on document for each date!)
+            },
+            {
+                $match: {
+                    startDates: { // between the first day of the year and the last day
+                        $gte: new Date(`${year}-01-01`),// mongo is perfect for working with dates
+                        $lte: new Date(`${year}-12-31`) 
+                    }
+                }
+            },
+            {
+                // group what we want to show
+                //https://docs.mongodb.com/manual/reference/operator/aggregation/
+                $group: {
+                    _id:{ $month: '$startDates'}, //by Month ! Thanks to the $month aggregation operator, mongo extract the month from date!!
+                    numTourStarts: { $sum: 1 },
+                    tours: { $push: '$name' } // creates an array with name field
+                }
+            },
+            {
+                $addFields: { month: '$_id' } // add the month field
+            },
+            {
+                //get rid of _id now
+                $project: {
+                    _id: 0 // _id no longer shows up
+                }
+            },
+            {
+                $sort: { numTourStarts: -1 } //sort by the number of Tours (starting with the highest amount of tours)
+            },
+            {
+                $limit: 12 // show only 6 documents ( not useful here, but example )
+            }
+        ])
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                plan
+            }
+        })
+    } catch(err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
+        })
+    }
+}
