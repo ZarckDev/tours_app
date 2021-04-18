@@ -52,13 +52,17 @@ const tourSchema = new mongoose.Schema({
         select: false // when we try to select (in fields limiting), we just hide createdAt
     },
     startDates: [Date]
+}, {
+    toJSON: { virtuals: true }, // virtuals to be part when outputing as JSON
+    toObject: { virtuals: true }, // virtuals to be part when outputing as Object
 });
 const Tour = mongoose.model('Tour', tourSchema)
 
+//Virtual Properties -> not stored in Database
+tourSchema.virtual('durationWeeks').get(function () {// get because will be created each time we get data from the database
+    // regular function because we need the "this" keyword
+    return this.duration / 7; // duration in weeks instead of days
+}) // we cannot use virtuals in a Query ! Because they are not part of the Database
+
 
 module.exports = Tour;
-
-
-//// testTour.save().then(doc => { // save() returns a Promise
-//     console.log(doc);
-// }).catch(err => console.log('💥 Error saving the document'));
