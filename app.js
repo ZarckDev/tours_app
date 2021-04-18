@@ -19,12 +19,7 @@ app.use(express.json());
 // Define the route for the Public folder to be accessible
 app.use(express.static(`${__dirname}/public`))
 
-//Create a middleware -- each middleware have access to req and res (going through all the pipeline)
-// Apply to every single request -- POSITION IS IMPORTANT
-app.use((req, res, next) => {
-    console.log('Hello from the middleware ✌');
-    next();
-})
+// middleware
 app.use((req, res, next) => {
     req.requestTime = new Date().toISOString(); // if we want the time for every request
     next();
@@ -35,6 +30,15 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter) // for this specific route - MOUNTING the router
 app.use('/api/v1/users', userRouter) // for this specific route - MOUNTING the router
 
+
+// Unknown route middleware handler
+// all for all the verbs(get, post, patch...)
+app.all('*', (req, res, next) => {
+    res.status(404).json({
+        status: 'fail',
+        message: `Page not Found -- Cannot find ${req.originalUrl}`
+    })
+})
 
 // export our Express app
 module.exports = app;
