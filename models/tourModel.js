@@ -53,7 +53,11 @@ const tourSchema = new mongoose.Schema({
         select: false // when we try to select (in fields limiting), we just hide createdAt
     },
     startDates: [Date],
-    slug: String // for our pre
+    slug: String, // for our pre() document middleware
+    secretTour: { // for Query middleware
+        type: Boolean,
+        default: false
+    }
 }, {
     toJSON: { virtuals: true }, // virtuals to be part when outputing as JSON
     toObject: { virtuals: true }, // virtuals to be part when outputing as Object
@@ -85,6 +89,25 @@ tourSchema.pre('save', function(next) {// run BEFORE an event on this model (her
 //     console.log(doc);
 //     next(); // not really needed but good practice
 // })
+
+
+// Query Middleware
+// here before any find() -- before executing "const tours = await features.query;" in tour Controler.js
+tourSchema.pre(/^find/, function(next) { // all methods that starts with find (findById, findOne...)
+// tourSchema.pre('find', function(next) { // query middleware, this points to the query now, not the document
+    //secret tours
+    this.find({ secretTour: { $ne: true }}) // this is a query object here
+    // we don't show the secret tours here
+    this.start = Date.now(); // query is a regular object, so we can add properties
+    next();
+})
+
+tourSchema.post(/^find/, function(docs, next) { // docs -- all documents returned by the query
+    console.log(`Query took ${Date.now()-this.start} milliseconds!`);
+    
+    // console.log(docs);
+    next();
+})
 
 const Tour = mongoose.model('Tour', tourSchema)
 
