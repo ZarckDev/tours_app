@@ -38,7 +38,6 @@ app.use('/api/v1/users', userRouter) // for this specific route - MOUNTING the r
 // Unknown route middleware handler
 // all for all the verbs(get, post, patch...)
 app.all('*', (req, res, next) => {
-
     const err = new AppError(`Cannot find ${req.originalUrl} in this server!`, 404);
     next(err); // pass the err in next -- express will now that this is an error!
     // skip all the middleware to go directly to the Error handle

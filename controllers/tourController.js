@@ -3,6 +3,7 @@ const Tour = require('../models/tourModel');
 //Utils
 const APIFeatures = require('../utils/apiFeatures')
 const catchAsync = require('../utils/catchAsync')
+const AppError = require('../utils/appError')
 
 
 // ROUTES HANDLERS SPECIFIC API REQUESTS
@@ -41,31 +42,17 @@ exports.getTour = catchAsync(async(req, res, next) => {
     const { id } = req.params;
     const tour = await Tour.findById(id);
 
+    if(!tour) {
+        const err = new AppError('No tour found with that ID', 404)
+        return next(err)
+    }
+    // otherwise
     res.status(200).json({
         status: 'success',
         data:{
             tour
         }
     })
-
-    // no longer needed thanks to the catchAsync function
-    // try{
-    //     const tour = await Tour.findById(id);
-    //     // Tour.findOne({ _id: req.params.id })
-
-    //     res.status(200).json({
-    //         status: 'success',
-    //         data:{
-    //             tour
-    //         }
-    //     })
-    // } catch(err) {
-    //     res.status(404).json({
-    //         status: 'fail',
-    //         message: err
-    //     })
-    // }
-
 })
 
 exports.createTour = catchAsync(async(req, res, next) => {
@@ -88,7 +75,11 @@ exports.updateTour = catchAsync(async(req, res, next) => {
         new: true, // return the new document into "tour"
         runValidators: true // on update we check the Schema, default is false
     });
-    // Tour.findOne({ _id: req.params.id })
+
+    if(!tour) {
+        const err = new AppError('No tour found with that ID', 404)
+        return next(err)
+    }
 
     res.status(200).json({
         status: 'success',
@@ -101,7 +92,12 @@ exports.updateTour = catchAsync(async(req, res, next) => {
 
 exports.deleteTour = catchAsync(async(req, res, next) => {
     const { id } = req.params;
-    await Tour.findByIdAndDelete(id);
+    const tour = await Tour.findByIdAndDelete(id);
+
+    if(!tour) {
+        const err = new AppError('No tour found with that ID', 404)
+        return next(err)
+    }
 
     res.status(204).json({ // 204 No Content
         status: 'success',

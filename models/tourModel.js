@@ -144,7 +144,7 @@ tourSchema.post(/^find/, function(docs, next) { // docs -- all documents returne
 tourSchema.pre('aggregate', function(next) {
     // exclude the secret tours from this aggregation!
     this.pipeline().unshift({ $match: { secretTour: { $ne: true }}}) //add at the beggining of an array
-    console.log(this.pipeline());
+    // console.log(this.pipeline());
     // this points to the current aggregation object
     next();
 })
