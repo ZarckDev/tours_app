@@ -72,7 +72,7 @@ tourSchema.virtual('durationWeeks').get(function () {// get because will be crea
 }) // we cannot use virtuals in a Query ! Because they are not part of the Database
 
 
-//Middleware on Documents -- allow us to do something before or after an operation on document
+// DOCUMENTS Middleware -- allow us to do something before or after an operation on document
 tourSchema.pre('save', function(next) {// run BEFORE an event on this model (here, before 'save()' and 'create()' in DB)
     // console.log(this); // this points to the current processed document
     this.slug = slugify(this.name, {lower:true})//new property
@@ -91,7 +91,7 @@ tourSchema.pre('save', function(next) {// run BEFORE an event on this model (her
 // })
 
 
-// Query Middleware
+// QUERY Middleware
 // here before any find() -- before executing "const tours = await features.query;" in tour Controler.js
 tourSchema.pre(/^find/, function(next) { // all methods that starts with find (findById, findOne...)
 // tourSchema.pre('find', function(next) { // query middleware, this points to the query now, not the document
@@ -108,6 +108,17 @@ tourSchema.post(/^find/, function(docs, next) { // docs -- all documents returne
     // console.log(docs);
     next();
 })
+
+
+// AGGREGATION middleware -- before or after an aggregation happens
+tourSchema.pre('aggregate', function(next) {
+    // exclude the secret tours from this aggregation!
+    this.pipeline().unshift({ $match: { secretTour: { $ne: true }}}) //add at the beggining of an array
+    console.log(this.pipeline());
+    // this points to the current aggregation object
+    next();
+})
+
 
 const Tour = mongoose.model('Tour', tourSchema)
 
