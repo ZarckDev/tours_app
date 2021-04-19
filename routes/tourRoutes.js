@@ -1,6 +1,7 @@
 const express = require ('express')
 
 const tourController = require('../controllers/tourController')
+const authController = require('../controllers/authController');
 
 const router = express.Router(); // It's a middleware that is executed before the .get() and others
 
@@ -23,7 +24,7 @@ router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan)
 
 // ROUTES
 router.route('/')
-    .get(tourController.getAllTours)
+    .get(authController.protect, tourController.getAllTours) // make sure we are authenticated to see this route
     .post(tourController.createTour)
 
 router.route('/:id')

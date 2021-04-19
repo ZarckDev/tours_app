@@ -26,6 +26,8 @@ app.use(express.static(`${__dirname}/public`))
 // middleware
 app.use((req, res, next) => {
     req.requestTime = new Date().toISOString(); // if we want the time for every request
+    // console.log(req.headers);
+    
     next();
 })
 

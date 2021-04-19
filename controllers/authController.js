@@ -1,3 +1,4 @@
+const { promisify } = require('util')
 const jwt = require('jsonwebtoken');
 
 const catchAsync = require('../utils/catchAsync');
@@ -20,7 +21,8 @@ exports.signup = catchAsync(async(req, res, next) => { // next is for catchAsync
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
-        passwordConfirm: req.body.passwordConfirm
+        passwordConfirm: req.body.passwordConfirm,
+        passwordChangedAt: req.body.passwordChangedAt
     });
 
     // Use JWT to sign in when user just created (same thing will happen when Sign In)
@@ -58,4 +60,44 @@ exports.login = catchAsync(async(req, res, next) => {
         status: 'success',
         token // give the token to the Client
     })
+})
+
+
+exports.protect = catchAsync(async (req, res, next) => {
+    let token;
+    // 1) Getting incoming token and check if it's there
+    // Standard for token is under Authorization header with Bearer in front of the token value
+    if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
+        token = req.headers.authorization.split(' ')[1]; // second element after Bearer
+    }
+
+    if(!token){ // no token sent --> no logged in
+        return next(new AppError('You are not logged in! Please login to get access.', 401))
+    }
+    
+    // 2) Verification of incoming token (compare signature)
+    // not return a promise by default so set Promise in order to use async using built-in Node util package --> Promisify jwt.verify() function, calls it with the arguments, then await the results
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET)
+    // manage errors in errorController.js -- will not continue the following if error thanks to errorController
+    // invalid webtoken --> JsonWebTokenError
+    // token expires, we change the time to test in .env --> TokenExpiredError
+
+    // 3) Check if user still exists (user can be removed from DB but still have the token in its browser -- our someone stole the token in the meantime)
+    // decoded contains the id of the user because we generated the token with that id
+    const currentUser = await User.findById(decoded.id);
+    if(!currentUser){
+        return next(new AppError('The user belonging to this token does no longer exist', 401))
+    }
+
+    // 4) Check if user changed password after the token was issued (if password changed, give a new web token on login)
+    // see userModel for method in userSchema
+    if(currentUser.changedPasswordAfter(decoded.iat)){ // iat for "issued at", when the token was delivered
+        return next(new AppError('User recently changed password! Please log in again.', 401))
+    }
+
+
+    // GRANT ACCESS TO PROTECTED ROUTE -- EVRYTHING ABOVE WENT WELL
+    // put the user data on the request for the next journey
+    req.user = currentUser;
+    next();
 })

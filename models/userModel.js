@@ -35,7 +35,8 @@ const userSchema = new mongoose.Schema({
             },
             message: 'Passwords are not the same!'
         }
-    }
+    },
+    passwordChangedAt: Date // last time password changed
 })
 
 // pre save document middleware for password
@@ -59,6 +60,19 @@ userSchema.pre('save', async function(next) {
 //Instance method -- available on all document of user model
 userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
     return await argon2.verify(userPassword, candidatePassword)
+}
+
+userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+    // this always points to the current document here
+    if(this.passwordChangedAt){ // if there is a history of password changes
+        //convert passwordChangedAt to milliseconds, convert to second (/1000) in order to compare with JWT iat , base 10
+        const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+
+        return JWTTimestamp < changedTimestamp; // if we changed the password after the token was issued, return (true); Otherwise the token is still valid (false)
+    }
+    
+    // False means NEVER changed
+    return false;
 }
 
 const User = mongoose.model('User', userSchema);

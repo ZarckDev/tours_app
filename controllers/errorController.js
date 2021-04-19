@@ -22,6 +22,10 @@ const handleValidationErrorDB = err => {
     return new AppError(message, 400);
 }
 
+const handleJWTError = () => new AppError('Invalid token. Please log in again!', 401)
+
+const handleJWTExpired = () => new AppError('Your token has expired! Please log in again.', 401)
+
 
 const sendErrorDev = (err, res) => {
     res.status(err.statusCode).json({
@@ -64,10 +68,12 @@ module.exports = (err, req, res, next) => { // this 4 parameters, Express recogn
         // nice errors in production
         let error = {...err};
 
-        // Operational errors
+        // Operational errors -- only in PRODUCTION
         if(err.name === 'CastError') error = handleCastErrorDB(err); // -- wrong id format example
         if(err.code === 11000) error = handleDuplicateFieldsDB(err); // 11000 is MongoDB error code  -- Tour name duplication example
         if(err.name === 'ValidationError')  error = handleValidationErrorDB(err);// Mongoose validation Error
+        if(err.name === 'JsonWebTokenError') error = handleJWTError(); // Token error in verify when accessing a protected route for example
+        if(err.name === 'TokenExpiredError') error = handleJWTExpired(); // When the token of the user expired, and try to access a protected route with this old token
         
         // Operational and non operational (default) errors send
         sendErrorProd(error, res);
