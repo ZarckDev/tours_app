@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const validator = require('validator'); // very useful library for STRING validation
+// const validator = require('validator'); // very useful library for STRING validation
 
 const tourSchema = new mongoose.Schema({
     name: {
@@ -12,13 +12,14 @@ const tourSchema = new mongoose.Schema({
         maxlength: [40, 'A tour name must have less or equal than 40 characters'],
         minlength: [10, 'A tour name must have more or equal than 10 characters'],
         // plugin the validator library for isAlpha (only letters in name)
-        validate: {
-            validator: function(value) {
-                //from validator library
-                return validator.isAlpha(value.split(' ').join('')); // error on spaces
-            },
-            message: 'Tour name must only contain characters.'
-          }
+        // not very useful in this case
+        // validate: { 
+        //     validator: function(value) {
+        //         //from validator library
+        //         return validator.isAlpha(value.split(' ').join('')); // error on spaces
+        //     },
+        //     message: 'Tour name must only contain characters.'
+        //   }
     },
     duration: {
         type: Number,
