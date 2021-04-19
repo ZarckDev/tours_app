@@ -8,6 +8,7 @@ const router = express.Router(); // It's a middleware
 
 // ROUTES FOR AUTH
 router.post('/signup', authController.signup)
+router.post('/login', authController.login)
 
 
 // ROUTES
