@@ -1,4 +1,5 @@
 const { promisify } = require('util')
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
 const catchAsync = require('../utils/catchAsync');
@@ -135,7 +136,7 @@ exports.forgotPassword = catchAsync(async(req, res, next) => {
 
     // 3) Send it to user's email
     // url for click to request a new password
-    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`
+    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}&${req.body.email}` // add email to make sure of unicity (if someone else managed to generate the same token...)
 
     const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL} \nIf you didn't forget your password, please ignore this email.`
 
@@ -161,4 +162,35 @@ exports.forgotPassword = catchAsync(async(req, res, next) => {
 
 exports.resetPassword = catchAsync(async(req, res, next) => {
 
+    //  1) Get user based on the token
+    // encrypt in order to compare with the encrypted token in DB
+    // in params, URL looks like this : /api/v1/users/resetPassword/db41106f266acee32759feb86a56fa4691047f01d0a78d332c8328a6da356cbc
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+    console.log(hashedToken);
+    
+
+    //the token is the only thing right now that can identify the user
+    const foundUser = await User.findOne({ email: req.params.email, passwordResetToken: hashedToken, passwordResetExpires: { $gt: Date.now() } }) // also check if toekn as not yet expires
+    
+    // 2) If token has not expired, and there is user, set new password
+    if(!foundUser){ // no user found with this token, or token has expired
+        return next(new AppError('Token is invalid or has expired', 400))
+    }
+    // otherwise, if everything is ok
+    foundUser.password = req.body.password;
+    foundUser.passwordConfirm = req.body.passwordConfirm;
+    // reset token
+    foundUser.passwordResetToken = undefined; 
+    foundUser.passwordResetExpires = undefined;
+    await foundUser.save(); // we want to validate here fro model (passwordConfirm === password)
+
+    // 3) update changedPasswordAt property for the user
+
+    // 4) Log the user in, send JWT
+    const token= signToken(foundUser._id); // send a token to directly Login
+    res.status(200).json({
+        status: 'success',
+        token // give the token to the Client
+    })
 })

@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
 })
 
 // pre save document middleware for password
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function(next) { // this one is basically when signup
     // only when password changes (not email or name or whatever)
     if(!this.isModified('password')) return next(); // check the password field change or not
 
@@ -62,6 +62,16 @@ userSchema.pre('save', async function(next) {
         console.log('Error hashing the password')
     }
 
+})
+
+// this one is basically when changing password -- but both pre.save() runs
+// the this.isNew is to see if this is a new document (so when Sign Up) -- next() in this case
+userSchema.pre('save', function(next) { // we use save only on register and change password
+    // only when password changes (not email or name or whatever)
+    if(!this.isModified('password') || this.isNew) return next(); // check the password field change or not
+
+    this.passwordChangedAt = Date.now() - 1000; // make sure the token is generated before (1s second to safely set in the past)
+    next();
 })
 
 
