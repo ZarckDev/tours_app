@@ -15,11 +15,27 @@ const signToken = id => {
     }); // sign with the user id from DB -- secret should be at least 32charac long, longer is better, as always -- I used 'randomKeygen' generator online
 }
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, res) => { // login token
     const token= signToken(user._id);
+
+    //store in a cookie
+    const cookieOptions ={
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000), // convert days to milliseconds
+        httpOnly: true, // cannot be accessed or modified in any way by the Browser !! (avoid cross site scripting attacks XSS)
+    }
+    // only sent on encrypted connection (HTTPS) -- in dev we are not in HTTPS
+    if(process.env.NODE_ENV === 'production') cookieOptions.secure = true
+    res.cookie('jwt', token, cookieOptions)
+
+    // just remove the password from the output.
+    user.password = undefined
+
     res.status(statusCode).json({
         status: 'success',
-        token // give the token to the Client
+        token, // give the token to the Client
+        data: {
+            user
+        }
     })
 }
 
