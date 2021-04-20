@@ -18,7 +18,8 @@ mongoose.connect(DB_URL, {
 
 
 // READ JSON File
-const tours = fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8');
+// const tours = fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8');
+const tours = fs.readFileSync(`${__dirname}/tours.json`, 'utf-8');
 //CONVERT TO JAVASCRIPT OBJECT
 const toursObj = JSON.parse(tours)
 

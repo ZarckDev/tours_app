@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 // const validator = require('validator'); // very useful library for STRING validation
 
+const User = require('./userModel')
+
 const tourSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -88,7 +90,32 @@ const tourSchema = new mongoose.Schema({
     secretTour: { // for Query middleware
         type: Boolean,
         default: false
-    }
+    },
+    startLocation: { // embedded object
+        // GeoJSON for geospatial data
+        type: { // subfields
+            type: String,
+            default: 'Point',
+            enum: ['Point'] // one option only
+        },
+        coordinates: [Number], // longitude first, latitude after in GeoJSON
+        address: String,
+        description: String
+    },
+    locations: [ // we could remove the startLocation and set the first location on Day 0
+        {
+            type: {
+                type: String,
+                default: 'Point',
+                enum: ['Point'] // one option only
+            },
+            coordinates: [Number], // longitude first, latitude after in GeoJSON
+            address: String,
+            description: String,
+            day: Number
+        }
+    ],
+    guides: Array
 }, {
     toJSON: { virtuals: true }, // virtuals to be part when outputing as JSON
     toObject: { virtuals: true }, // virtuals to be part when outputing as Object
@@ -109,6 +136,14 @@ tourSchema.pre('save', function(next) {// run BEFORE an event on this model (her
     this.slug = slugify(this.name, {lower:true})//new property
     next();
 }) 
+
+// tourSchema.pre('save', async function(next) { // Embedding on save (populate) based on the id
+//     const guidesPromises = this.guides.map(async id => await User.findById(id)) // guides Promises is an array full of promises
+//     //get the result of all promises
+//     this.guides = await Promise.all(guidesPromises);
+
+//     next();
+// })
 
 // tourSchema.pre('save', function(next) { // we can have multiple pre() for a same "Hook"
 //     console.log('Will save document...');
