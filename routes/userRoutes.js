@@ -10,6 +10,9 @@ const router = express.Router(); // It's a middleware
 router.post('/signup', authController.signup)
 router.post('/login', authController.login)
 
+// ROUTES FOR FORGOT PASSWORD
+router.post('/forgotPassword', authController.forgotPassword)
+router.post('/resetPassword', authController.resetPassword)
 
 // ROUTES
 router.route('/')

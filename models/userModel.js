@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator'); // very useful library for STRING validation
 const argon2 = require('argon2');
+const crypto = require('crypto');
 
 
 const userSchema = new mongoose.Schema({
@@ -41,7 +42,9 @@ const userSchema = new mongoose.Schema({
             message: 'Passwords are not the same!'
         }
     },
-    passwordChangedAt: Date // last time password changed
+    passwordChangedAt: Date, // last time password changed
+    passwordResetToken: String,
+    passwordResetExpires: Date
 })
 
 // pre save document middleware for password
@@ -78,6 +81,20 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
     
     // False means NEVER changed
     return false;
+}
+
+userSchema.methods.createPasswordResetToken = function() {
+    // Does not need to be as Cryptographic strong as the login token
+    // So we can use the crypto built-in module
+    const resetToken = crypto.randomBytes(32).toString('hex')
+    // Do not store the plain token in database, hash it (no need for Argon2 for this temp password)
+    this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    console.log({resetToken}, this.passwordResetToken);
+
+    this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 min
+
+    return resetToken; // we don't send the encrypted one to the user, because it does not make any sense to send encrypted from DB -- encrypted is only for DataBase if someone acces the database!
 }
 
 const User = mongoose.model('User', userSchema);

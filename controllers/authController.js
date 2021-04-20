@@ -116,3 +116,25 @@ exports.restrictTo = (...roles) => {
         next();
     }
 }
+
+
+exports.forgotPassword = catchAsync(async(req, res, next) => {
+    // 1) Get user based on POSTed email
+    const user = await User.findOne({ email: req.body.email })
+    if(!user){ // no user found
+        return next(new AppError('There is no user with email address', 404))
+    }
+
+    // 2) Generate the random token (nothing to do with JSon Web Token)
+    // token that will identify the user when reaching the New Password page (it's like a temporary password) -- still do not store the plain token in database, hash it
+    // see userModel for the Schema method
+    const resetToken = user.createPasswordResetToken();
+    //need to save in database
+    await user.save({validateBeforeSave: false}); // disable the validation because we only update the passwordResetToken and passwordResetExpires here (we would have error not mentioning email and password if not) - because we don't have the password, we forgot it !
+
+    // 3) Send it to user's email
+})
+
+exports.resetPassword = catchAsync(async(req, res, next) => {
+
+})
