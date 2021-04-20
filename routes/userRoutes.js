@@ -12,7 +12,7 @@ router.post('/login', authController.login)
 
 // ROUTES FOR FORGOT PASSWORD
 router.post('/forgotPassword', authController.forgotPassword)
-router.post('/resetPassword', authController.resetPassword)
+router.patch('/resetPassword/:token', authController.resetPassword) // we pass the reset password token to identify the user
 
 // ROUTES
 router.route('/')
