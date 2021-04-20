@@ -18,6 +18,7 @@ router.patch('/resetPassword/:token&:email', authController.resetPassword) // we
 // WHEN LOGGED IN -- user is in req thanks to protect
 router.patch('/updateMyPassword', authController.protect, authController.updatePassword) // protect ensure we are logged in and so put the user in the request object
 router.patch('/updateMe', authController.protect, userController.updateMe)
+router.delete('/deleteMe', authController.protect, userController.deleteMe)
 
 // ROUTES
 router.route('/')

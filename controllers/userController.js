@@ -55,6 +55,16 @@ exports.updateMe = catchAsync(async(req, res, next) => {
     })
 })
 
+// just set to inative, not delete from DB
+exports.deleteMe = catchAsync(async(req, res, next) => {
+    await User.findByIdAndUpdate(req.user.id, {active: false})
+
+    res.status(204).json({
+        status: 'success',
+        data: null
+    })
+})
+
 exports.getUser = (req, res) => {
     // internal server error -- not implemented
     res.status(500).json({

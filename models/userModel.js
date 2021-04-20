@@ -44,7 +44,12 @@ const userSchema = new mongoose.Schema({
     },
     passwordChangedAt: Date, // last time password changed
     passwordResetToken: String,
-    passwordResetExpires: Date
+    passwordResetExpires: Date,
+    active: { // active user
+        type: Boolean,
+        default: true,
+        select: false // don't show this field
+    }
 })
 
 // pre save document middleware for password
@@ -74,6 +79,13 @@ userSchema.pre('save', function(next) { // we use save only on register and chan
     next();
 })
 
+// Query Middleware --  don't show the INACTIVE users whe looking for users
+userSchema.pre(/^find/, function(next) {
+    // this points to the current query
+    this.find({ active: { $ne: false }})  // only show the active users
+    
+    next();
+})
 
 //Instance method -- available on all document of user model
 userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
