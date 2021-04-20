@@ -180,6 +180,16 @@ tourSchema.post(/^find/, function(docs, next) { // docs -- all documents returne
     next();
 })
 
+tourSchema.pre(/^find/, function(next) {
+    // we can specify what we want to populate
+    this.populate({ // everything will populate the guides
+        path: 'guides',
+        select: '-__v -passwordChangedAt -passwordResetExpires -passwordResetToken' // remove the "__v" and "passwordChangedAt" from results
+    });// Populate can slow down our application (it creates new query), think before use it, good for small application
+
+    next()
+})
+
 
 // AGGREGATION middleware -- before or after an aggregation happens
 tourSchema.pre('aggregate', function(next) {

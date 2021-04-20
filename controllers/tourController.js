@@ -40,7 +40,14 @@ exports.getAllTours = catchAsync(async(req, res, next) => {
 
 exports.getTour = catchAsync(async(req, res, next) => {
     const { id } = req.params;
-    const tour = await Tour.findById(id);
+    // const tour = await Tour.findById(id).populate('guides'); // populate the guides (only guides id in DB)
+    // we can specify what we want to populate
+    const tour = await Tour.findById(id)
+    
+    // .populate({  /// ADDED IN QUERY MIDDLEWARE INSTEAD (IN TOURMODEL), TO BE USE BY DEFAULT IN ALL FIND QUERY
+    //     path: 'guides',
+    //     select: '-__v -passwordChangedAt' // remove the "__v" and "passwordChangedAt" from results
+    // });// Populate can slow down our application (it creates new query), think before use it, good for small application
 
     if(!tour) {
         const err = new AppError('No tour found with that ID', 404)
