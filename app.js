@@ -6,6 +6,8 @@ const morgan = require('morgan'); // Request Logger with details
 const rateLimit = require('express-rate-limit')
 //HELMET HTTP header security
 const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize')
+const xss = require('xss-clean')
 
 const AppError = require('./utils/appError');
 
@@ -40,6 +42,14 @@ app.use('/api', limiter) // all routes that starts with '/api'
 app.use(express.json({ // options to limit the amount of data sent in the body for SECURITY
     limit: '10kb' // limit of 10k bytes
 }));
+
+
+// Clean the data (using sanitization) again NoSQL query injection
+app.use(mongoSanitize())
+
+// Data sanitization against XSS
+app.use(xss())
+// TODO (MAYBE) with sanitize-html package instead of xss-clean package like Jonas (4 years old...)
 
 // Define the route for the Public folder to be accessible
 app.use(express.static(`${__dirname}/public`))
