@@ -1,6 +1,7 @@
 
 const express = require('express');
 const morgan = require('morgan'); // Request Logger with details
+const rateLimit = require('express-rate-limit')
 
 const AppError = require('./utils/appError');
 
@@ -12,11 +13,19 @@ const userRouter = require('./routes/userRoutes')
 const app = express();
 
 
-// MIDDLEWARES - for all the routes
+// GLOBAL MIDDLEWARES - for all the routes
 console.log(process.env.NODE_ENV)
 if(process.env.NODE_ENV === 'development'){
     app.use(morgan('dev'));
 }
+
+//limite the requests (if atttacks -- Brute force)
+const limiter = rateLimit({
+    max: 100, // 100 requests - to adapt to the application
+    window: 60 * 60 * 1000, // per 1 hour
+    message: 'Too many requests from this IP, please try again in an hour!'
+})
+app.use('/api', limiter) // all routes that starts with '/api'
 
 app.use(express.json());
 
