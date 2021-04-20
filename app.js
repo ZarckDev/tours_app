@@ -7,7 +7,8 @@ const rateLimit = require('express-rate-limit')
 //HELMET HTTP header security
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize')
-const xss = require('xss-clean')
+const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const AppError = require('./utils/appError');
 
@@ -50,6 +51,18 @@ app.use(mongoSanitize())
 // Data sanitization against XSS
 app.use(xss())
 // TODO (MAYBE) with sanitize-html package instead of xss-clean package like Jonas (4 years old...)
+
+// Prevent parameter pollution (clean the query string in the url, using the last one if repetition)
+app.use(hpp({ // whitelist some parameters
+    whitelist: [
+        'duration', // we can ask for multiple duration ?duration=5&duration=9
+        'ratingsQuantity',
+        'ratingsAverage',
+        'maxGroupSize',
+        'difficulty',
+        'price'
+    ]
+}))
 
 // Define the route for the Public folder to be accessible
 app.use(express.static(`${__dirname}/public`))
