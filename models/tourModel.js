@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 // const validator = require('validator'); // very useful library for STRING validation
 
-const User = require('./userModel')
+// const User = require('./userModel')
 
 const tourSchema = new mongoose.Schema({
     name: {
@@ -115,7 +115,12 @@ const tourSchema = new mongoose.Schema({
             day: Number
         }
     ],
-    guides: Array
+    guides: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User' // ref User Model (see user.js)
+        }
+    ]
 }, {
     toJSON: { virtuals: true }, // virtuals to be part when outputing as JSON
     toObject: { virtuals: true }, // virtuals to be part when outputing as Object
