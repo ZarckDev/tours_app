@@ -15,6 +15,13 @@ const signToken = id => {
     }); // sign with the user id from DB -- secret should be at least 32charac long, longer is better, as always -- I used 'randomKeygen' generator online
 }
 
+const createSendToken = (user, statusCode, res) => {
+    const token= signToken(user._id);
+    res.status(statusCode).json({
+        status: 'success',
+        token // give the token to the Client
+    })
+}
 
 exports.signup = catchAsync(async(req, res, next) => { // next is for catchAsync
     // const newUser = await User.create({...req.body}); // DO NOT USE THIS SPREAD, BECAUSE SOMEONE CAN ADD SOMETHING TO THE BODY, like role: "admin", it can be dramatic
@@ -29,15 +36,7 @@ exports.signup = catchAsync(async(req, res, next) => { // next is for catchAsync
     });
 
     // Use JWT to sign in when user just created (same thing will happen when Sign In)
-    const token = signToken(newUser._id)
-
-    res.status(201).json({
-        status: 'success',
-        token, // give the token to the Client
-        data: {
-            user: newUser
-        }
-    })
+    createSendToken(newUser, 201, res)
 })
 
 
@@ -58,11 +57,7 @@ exports.login = catchAsync(async(req, res, next) => {
     }
 
     // 3) If everything is ok, send token to client
-    const token= signToken(user._id);
-    res.status(200).json({
-        status: 'success',
-        token // give the token to the Client
-    })
+    createSendToken(user, 200, res)
 })
 
 
@@ -188,9 +183,30 @@ exports.resetPassword = catchAsync(async(req, res, next) => {
     // 3) update changedPasswordAt property for the user
 
     // 4) Log the user in, send JWT
-    const token= signToken(foundUser._id); // send a token to directly Login
-    res.status(200).json({
-        status: 'success',
-        token // give the token to the Client
-    })
+    createSendToken(foundUser, 200, res)
+})
+
+
+// Logged in User that wants to update its password
+exports.updatePassword = catchAsync(async(req, res, next) => {
+    // 1) Get the user from the collection
+    // We are logged in, so we already have our user in the request (coming from protect middleware)
+    const user = await User.findById(req.user.id).select('+password'); // get the user with the password
+
+    // 2) Check if the POSTed password is correct (old password)
+    if(!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+        return next(new AppError('Your curretn password is wrong', 401))
+    }
+
+    // 3) If so, update the password
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+
+    await user.save(); // pre.save() functions in userModel will hash, and the other one, set the passwordChangedAt.
+
+    //WE DON'T USE findByIdAndUpdate() because our pre.save() will not work, for hasing password
+    // AND ALSO, The validator in model for passwordConfirm WILL NOT WORK (Only on save() and create())
+
+    // 4) Log user in automatically, send JWT
+    createSendToken(user, 200, res)
 })
