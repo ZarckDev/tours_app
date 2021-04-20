@@ -15,8 +15,9 @@ router.post('/forgotPassword', authController.forgotPassword)
 router.patch('/resetPassword/:token&:email', authController.resetPassword) // we pass the reset password token to identify the user
 
 
-// WHEN LOGGED IN
+// WHEN LOGGED IN -- user is in req thanks to protect
 router.patch('/updateMyPassword', authController.protect, authController.updatePassword) // protect ensure we are logged in and so put the user in the request object
+router.patch('/updateMe', authController.protect, userController.updateMe)
 
 // ROUTES
 router.route('/')
