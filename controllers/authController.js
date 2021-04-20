@@ -22,7 +22,8 @@ exports.signup = catchAsync(async(req, res, next) => { // next is for catchAsync
         email: req.body.email,
         password: req.body.password,
         passwordConfirm: req.body.passwordConfirm,
-        passwordChangedAt: req.body.passwordChangedAt
+        passwordChangedAt: req.body.passwordChangedAt,
+        role: req.body.role
     });
 
     // Use JWT to sign in when user just created (same thing will happen when Sign In)
@@ -101,3 +102,17 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.user = currentUser;
     next();
 })
+
+//In order to get argument, wrap a function with the arguments to return the normal middleware function
+// ...roles puts arguments in an array
+exports.restrictTo = (...roles) => {
+    return (req, res, next) => {
+        //roles ['admin', 'lead-guide']
+        // req comes from previous middleware, so protect() with the user inside
+        if(!roles.includes(req.user.role)){// One of the roles (from arguments) in not included as role from current User --> set an permission error
+            return next(new AppError('You do not have permission to perform this action', 403))
+        }
+        // otherwise we allow access to the next middleware
+        next();
+    }
+}

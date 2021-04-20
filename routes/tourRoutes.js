@@ -30,6 +30,6 @@ router.route('/')
 router.route('/:id')
     .get(tourController.getTour)
     .patch(tourController.updateTour)//patch to only update a property
-    .delete(tourController.deleteTour);
+    .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), tourController.deleteTour); // check if logged in first, then check if the user is authorized to delete (only admin and lead-guide)
 
 module.exports = router;
