@@ -1,47 +1,22 @@
 //Model
-const Tour = require('../models/tourModel');
 const Review = require('../models/reviewModel');
 //Utils
-const catchAsync = require('../utils/catchAsync')
-const AppError = require('../utils/appError')
+// const catchAsync = require('../utils/catchAsync')
+
+// Factory
+const factory = require('./handlerFactory')
 
 
-
-exports.getAllReviews = catchAsync(async(req, res, next) => {
-
-    let filter = {}
-    // In case we want all the reviews, but for a specific Tour
-    if(req.params.tourId) filter = { tour: req.params.tourId}; // from url
-    // otherwise find all reviews
-
-    // EXECUTE QUERY
-    const reviews = await Review.find(filter); 
-
-    res.status(200).json({
-        status: 'success',
-        results: reviews.length, // because we send an array
-        data:{
-            reviews
-        }
-    })
-
-})
-
-
-exports.createReview = catchAsync(async(req, res, next) => {
-    
+exports.setTourUserIds = (req, res, next) => {
     // Allow nested routes - we can still specify the tour and the user ids
     // If tour is not mention in the body, get it from url
     if(!req.body.tour) req.body.tour = req.params.tourId; // from url
     if(!req.body.user) req.body.user = req.user.id; // access to user because we are logged in at this point
-    
-    const newReview = await Review.create({...req.body});
+    next();
+}
 
-    res.status(201).json({
-        status: 'success',
-        data:{
-            review: newReview
-        }
-    })
-
-})
+exports.getAllReviews = factory.getAll(Review); // now we can use features for reviews
+exports.getReview = factory.getOne(Review); // no populate option
+exports.createReview = factory.createOne(Review);
+exports.updateReview = factory.updateOne(Review);
+exports.deleteReview = factory.deleteOne(Review); // pass the Model

@@ -1,10 +1,11 @@
 //Model
 const Tour = require('../models/tourModel');
 //Utils
-const APIFeatures = require('../utils/apiFeatures')
-const catchAsync = require('../utils/catchAsync')
-const AppError = require('../utils/appError')
 
+const catchAsync = require('../utils/catchAsync')
+
+// Factory
+const factory = require('./handlerFactory')
 
 // ROUTES HANDLERS SPECIFIC API REQUESTS
 // Top 5 middleware
@@ -20,97 +21,30 @@ exports.aliasTopTours = (req, res, next) => {
  
 
 // ROUTES HANDLERS
-exports.getAllTours = catchAsync(async(req, res, next) => {
-    // EXECUTE QUERY
-    const features = new APIFeatures(Tour.find(), req.query) // Tour.find() to give a Query, important for operations inside methods !
-    features.filter().sort().limitFields().paginate(); // we manipulate the query if there are any specific query
-    const tours = await features.query;
-
-    res.status(200).json({
-        status: 'success',
-        results: tours.length, // because we send an array
-        data:{
-            tours
-        }
-    })
-
-})
+exports.getAllTours = factory.getAll(Tour)
 
 
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 
-exports.getTour = catchAsync(async(req, res, next) => {
-    const { id } = req.params;
-    // const tour = await Tour.findById(id).populate('guides'); // populate the guides (only guides id in DB)
-    // we can specify what we want to populate
-    const tour = await Tour.findById(id).populate('reviews');
-    
-    // .populate({  /// ADDED IN QUERY MIDDLEWARE INSTEAD (IN TOURMODEL), TO BE USE BY DEFAULT IN ALL FIND QUERY
-    //     path: 'guides',
-    //     select: '-__v -passwordChangedAt' // remove the "__v" and "passwordChangedAt" from results
-    // });// Populate can slow down our application (it creates new query), think before use it, good for small application
+exports.createTour = factory.createOne(Tour);
 
-    if(!tour) {
-        const err = new AppError('No tour found with that ID', 404)
-        return next(err)
-    }
-    // otherwise
-    res.status(200).json({
-        status: 'success',
-        data:{
-            tour
-        }
-    })
-})
+exports.updateTour = factory.updateOne(Tour);
 
-exports.createTour = catchAsync(async(req, res, next) => {
-    //const NewTour = new Tour({})
-    // await newTour.save()
-    const newTour = await Tour.create({...req.body});
-    
-    res.status(201).json({// created
-        status: 'success',
-        data: {
-            tour: newTour
-        }
-    }); 
-})
+exports.deleteTour = factory.deleteOne(Tour); // passing the model
+// exports.deleteTour = catchAsync(async(req, res, next) => {
+//     const { id } = req.params;
+//     const tour = await Tour.findByIdAndDelete(id);
 
-exports.updateTour = catchAsync(async(req, res, next) => {
-    const { id } = req.params;
+//     if(!tour) {
+//         const err = new AppError('No tour found with that ID', 404)
+//         return next(err)
+//     }
 
-    const tour = await Tour.findByIdAndUpdate(id, {...req.body}, {
-        new: true, // return the new document into "tour"
-        runValidators: true // on update we check the Schema, default is false
-    });
-
-    if(!tour) {
-        const err = new AppError('No tour found with that ID', 404)
-        return next(err)
-    }
-
-    res.status(200).json({
-        status: 'success',
-        data: {
-            tour
-        }
-    })
-
-})
-
-exports.deleteTour = catchAsync(async(req, res, next) => {
-    const { id } = req.params;
-    const tour = await Tour.findByIdAndDelete(id);
-
-    if(!tour) {
-        const err = new AppError('No tour found with that ID', 404)
-        return next(err)
-    }
-
-    res.status(204).json({ // 204 No Content
-        status: 'success',
-        data: null // show the ressource we deleted is not enymore here
-    })
-})
+//     res.status(204).json({ // 204 No Content
+//         status: 'success',
+//         data: null // show the ressource we deleted is not enymore here
+//     })
+// })
 
 
 exports.getTourStats = catchAsync(async(req, res, next) => {

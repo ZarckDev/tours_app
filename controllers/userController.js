@@ -4,6 +4,9 @@ const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 
+// Factory
+const factory = require('./handlerFactory')
+
 
 const filterObj = (obj, ...allowedfields) => {
     const newObj = {}
@@ -15,18 +18,7 @@ const filterObj = (obj, ...allowedfields) => {
 }
 
 // ROUTES HANDLERS
-exports.getAllUsers = catchAsync(async(req, res) => {
-    // internal server error -- not implemented
-    const users = await User.find();
 
-    res.status(200).json({
-        status: 'success',
-        results: users.length, // because we send an array
-        data:{
-            users
-        }
-    })
-})
 
 // 'user' can update some fields (name, email) -- not in the same route/ place as update password
 exports.updateMe = catchAsync(async(req, res, next) => {
@@ -65,31 +57,23 @@ exports.deleteMe = catchAsync(async(req, res, next) => {
     })
 })
 
-exports.getUser = (req, res) => {
-    // internal server error -- not implemented
-    res.status(500).json({
-        status: 'error',
-        message: "This route is not yet defined!"
-    })
-}
 exports.createUser = (req, res) => {
     // internal server error -- not implemented
     res.status(500).json({
         status: 'error',
-        message: "This route is not yet defined!"
+        message: "This route is not yet defined! Please use /signup instead"
     })
 }
-exports.updateUser = (req, res) => {
-    // internal server error -- not implemented
-    res.status(500).json({
-        status: 'error',
-        message: "This route is not yet defined!"
-    })
-}
-exports.deleteUser = (req, res) => {
-    // internal server error -- not implemented
-    res.status(500).json({
-        status: 'error',
-        message: "This route is not yet defined!"
-    })
-}
+
+exports.getAllUsers = factory.getAll(User);
+exports.getUser = factory.getOne(User); // no populate option
+// Do NOT Update passwords with this
+exports.updateUser = factory.updateOne(User); // only Admin
+exports.deleteUser = factory.deleteOne(User); // only Admin
+// exports.deleteUser = (req, res) => {
+//     // internal server error -- not implemented
+//     res.status(500).json({
+//         status: 'error',
+//         message: "This route is not yet defined!"
+//     })
+// }
