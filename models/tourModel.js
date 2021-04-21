@@ -135,6 +135,14 @@ tourSchema.virtual('durationWeeks').get(function () {// get because will be crea
 }) // we cannot use virtuals in a Query ! Because they are not part of the Database
 
 
+// Virtual populate (new field reviews in tour) -- EXAMPLE
+tourSchema.virtual('reviews', {
+    ref: 'Review',
+    foreignField: 'tour',// name of the field in the other model (field tour in reviewSchema)
+    localField: '_id' // _id from here (the tourSchema), it is how it is called in "tour" property in reviewSchema , it's the BIND between the two Schema (connection)
+})
+
+
 // DOCUMENTS Middleware -- allow us to do something before or after an operation on document
 tourSchema.pre('save', function(next) {// run BEFORE an event on this model (here, before 'save()' and 'create()' in DB) !!!!!!!!! NOT ON UPDATE !!!!!!!!!
     // console.log(this); // this points to the current processed document
