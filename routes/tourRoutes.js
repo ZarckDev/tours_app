@@ -3,6 +3,8 @@ const express = require ('express')
 const tourController = require('../controllers/tourController')
 const authController = require('../controllers/authController');
 
+const reviewRouter = require('../routes/reviewRoutes');
+
 const router = express.Router(); // It's a middleware that is executed before the .get() and others
 
 // Param Middleware function -- ONLY FOR THIS ROUTER
@@ -11,6 +13,12 @@ const router = express.Router(); // It's a middleware that is executed before th
 //     next();
 // })
 // router.param('id', tourController.checkID); // middleware to check the ID for /:id routes
+
+
+// reviews
+router.use('/:tourId/reviews', reviewRouter) // use the review Router in case of this url
+//  /api/v1/tours/:tourId/reviews
+
 
 
 // ROUTES FOR SPECIFIC API REQUESTS
@@ -31,5 +39,7 @@ router.route('/:id')
     .get(tourController.getTour)
     .patch(tourController.updateTour)//patch to only update a property
     .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), tourController.deleteTour); // check if logged in first, then check if the user is authorized to delete (only admin and lead-guide)
+
+
 
 module.exports = router;

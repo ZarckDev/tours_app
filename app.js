@@ -16,7 +16,6 @@ const globalErrorHandler = require('./controllers/errorController')
 
 const tourRouter = require('./routes/tourRoutes')
 const userRouter = require('./routes/userRoutes')
-const reviewRouter = require('./routes/reviewRoutes')
 
 const app = express();
 
@@ -80,7 +79,7 @@ app.use((req, res, next) => {
 // ROUTES - middlewares for specific routes
 app.use('/api/v1/tours', tourRouter) // for this specific route - MOUNTING the router
 app.use('/api/v1/users', userRouter) // for this specific route - MOUNTING the router
-app.use('/api/v1/reviews', reviewRouter) // for this specific route - MOUNTING the router
+// app.use('/api/v1/reviews', reviewRouter) // reviews in tours route
 
 
 // Unknown route middleware handler

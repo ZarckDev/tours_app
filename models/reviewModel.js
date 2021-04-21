@@ -32,25 +32,6 @@ const reviewSchema = new mongoose.Schema({
 })
 
 
-// Query middleware
-reviewSchema.pre(/^find/, function(next) {
-    // we can specify what we want to populate
-    // this.populate({ 
-    //     path: 'tour',
-    //     select: '-guides name' // only name
-    // }).populate({ //for users
-    //     path: 'user',
-    //     select: 'name photo' // only name and photo
-    // });
-
-    this.populate({ // only user after all because we don't want a chain of populate
-        path: 'user',
-        select: 'name photo' // only name and photo
-    });
-
-    next()
-})
-
 
 const Review = mongoose.model('Review', reviewSchema);
 
