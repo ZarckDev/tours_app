@@ -23,22 +23,45 @@ router.use('/:tourId/reviews', reviewRouter) // use the review Router in case of
 
 // ROUTES FOR SPECIFIC API REQUESTS
 // run a middleware before getting the tours, in order to define the query in request
-router.route('/top-5-cheap').get(tourController.aliasTopTours, tourController.getAllTours)
+router.route('/top-5-cheap')
+    .get(
+        tourController.aliasTopTours, // build the query for filtering and sort
+        tourController.getAllTours // get the tour with Features (query string)
+    )
 
 
 // ROUTES FOR PIPELINE
-router.route('/tour-stats').get(tourController.getTourStats)
-router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan)
+router.route('/tour-stats')
+    .get(tourController.getTourStats)
+router.route('/monthly-plan/:year')
+    .get(
+        authController.protect, // only logged In
+        authController.restrictTo('admin', 'lead-guide', 'guide'), // only admin, guide and lead-guide can obtain the montly plan for a year
+        tourController.getMonthlyPlan
+    )
+
 
 // ROUTES
 router.route('/')
-    .get(authController.protect, tourController.getAllTours) // make sure we are authenticated to see this route
-    .post(tourController.createTour)
+    .get(tourController.getAllTours) // all tours are visible to everyone
+    .post(
+        authController.protect, // only logged In
+        authController.restrictTo('admin', 'lead-guide'), // only admin and lead-guide can create a tour
+        tourController.createTour
+    )
 
 router.route('/:id')
-    .get(tourController.getTour)
-    .patch(tourController.updateTour)//patch to only update a property
-    .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), tourController.deleteTour); // check if logged in first, then check if the user is authorized to delete (only admin and lead-guide)
+    .get(tourController.getTour) // a tour is visible to everyone
+    .patch(
+        authController.protect, // only logged In
+        authController.restrictTo('admin', 'lead-guide'), // only admin and lead-guide can update a tour
+        tourController.updateTour
+    )
+    .delete(
+        authController.protect,  // only logged In
+        authController.restrictTo('admin', 'lead-guide'), // only admin and lead-guide can delete a tour
+        tourController.deleteTour
+    );
 
 
 

@@ -17,7 +17,12 @@ const filterObj = (obj, ...allowedfields) => {
     return newObj;
 }
 
-// ROUTES HANDLERS
+
+//based on the current user logged In -- a simple middlware for getOne
+exports.getMe = (req, res, next) => {
+    req.params.id = req.user.id;
+    next()
+}
 
 
 // 'user' can update some fields (name, email) -- not in the same route/ place as update password

@@ -16,11 +16,21 @@ router.patch('/resetPassword/:token&:email', authController.resetPassword) // we
 
 
 // WHEN LOGGED IN -- user is in req thanks to protect
-router.patch('/updateMyPassword', authController.protect, authController.updatePassword) // protect ensure we are logged in and so put the user in the request object
-router.patch('/updateMe', authController.protect, userController.updateMe)
-router.delete('/deleteMe', authController.protect, userController.deleteMe)
 
-// ROUTES
+// Protect ALL ROUTES AFTER THIS MIDDLEWARE -- need to be logged In
+router.use(authController.protect) 
+
+//routes
+router.patch('/updateMyPassword', authController.updatePassword) // protect ensure we are logged in and so put the user in the request object
+router.get('/me', userController.getMe, userController.getUser)// protect set the req.user, getMe put the user as a param id to fake the getUser
+router.patch('/updateMe', userController.updateMe)
+router.delete('/deleteMe', userController.deleteMe)
+
+
+// Restrict all following routes to ADMIN
+router.use(authController.restrictTo('admin'))
+
+//routes
 router.route('/')
     .get(userController.getAllUsers)
     .post(userController.createUser);
