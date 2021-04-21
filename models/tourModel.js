@@ -127,6 +127,18 @@ const tourSchema = new mongoose.Schema({
     id: false // remove the additional id created with pre() and post()
 });
 
+//for a query specific selector (for example ?price[lt]=1000)
+// before we had to go though all the documents
+// Use indexes to define price as the order index, this way, we only go through the lowest price first, we get directly the ones needed -- it will be the most requested request by user
+// tourSchema.index({price: 1}) // sorting the price index ascending -- single index
+
+// By default when getting all tours -- by default indexes by id
+// Index by price < 1000 AND averageRating > 4.7 -- COMPOUND INDEXES
+tourSchema.index({price: 1, ratingsAverage: -1}); // price low to high, ratings best to lower
+//cost of index is IMPORTANT - BE CAREFUL
+// we could use slugy to query a tour
+tourSchema.index({ slug: 1 });
+
 
 //Virtual Properties -> not stored in Database
 tourSchema.virtual('durationWeeks').get(function () {// get because will be created each time we get data from the database

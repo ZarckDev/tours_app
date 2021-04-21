@@ -115,6 +115,7 @@ exports.getAll = Model =>
         const features = new APIFeatures(Model.find(filter), req.query) // Tour.find() to give a Query, important for operations inside methods !
         features.filter().sort().limitFields().paginate(); // we manipulate the query if there are any specific query
         const docs = await features.query;
+        // const docs = await features.query.explain(); // show statistics details of the operation
 
         // if we want the collection name
         const collectionName = getCollectionName(Model);
