@@ -8,8 +8,14 @@ const AppError = require('../utils/appError')
 
 
 exports.getAllReviews = catchAsync(async(req, res, next) => {
+
+    let filter = {}
+    // In case we want all the reviews, but for a specific Tour
+    if(req.params.tourId) filter = { tour: req.params.tourId}; // from url
+    // otherwise find all reviews
+
     // EXECUTE QUERY
-    const reviews = await Review.find(); 
+    const reviews = await Review.find(filter); 
 
     res.status(200).json({
         status: 'success',
