@@ -85,7 +85,7 @@ app.use((req, res, next) => {
 
 // ROUTES - middlewares for specific routes
 app.get('/', (req, res) => {
-    res.status(200).render('base', {
+    res.status(200).render('overview', {
         tour:'The Forest Hiker',
         user:'Marc'
     })
