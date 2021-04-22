@@ -25,7 +25,7 @@ const app = express();
 app.set('view engine', 'pug'); // set pug as template
 app.set('views', path.join(__dirname, 'views'))
 
-// Define the route for the Public folder to be accessible
+// Define the route for the Public folder to be accessible (for files in /public requests)
 // app.use(express.static(`${__dirname}/public`))
 app.use(express.static(path.join(__dirname, 'public')))
 
@@ -85,7 +85,10 @@ app.use((req, res, next) => {
 
 // ROUTES - middlewares for specific routes
 app.get('/', (req, res) => {
-    res.status(200).render('base')
+    res.status(200).render('base', {
+        tour:'The Forest Hiker',
+        user:'Marc'
+    })
 })
 
 app.use('/api/v1/tours', tourRouter) // for this specific route - MOUNTING the router
