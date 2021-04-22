@@ -1,5 +1,6 @@
 
 const express = require('express');
+const path = require('path')
 const morgan = require('morgan'); // Request Logger with details
 
 //Security
@@ -20,6 +21,13 @@ const reviewRouter = require('./routes/reviewRoutes')
 
 const app = express();
 
+
+app.set('view engine', 'pug'); // set pug as template
+app.set('views', path.join(__dirname, 'views'))
+
+// Define the route for the Public folder to be accessible
+// app.use(express.static(`${__dirname}/public`))
+app.use(express.static(path.join(__dirname, 'public')))
 
 // GLOBAL MIDDLEWARES - for all the routes
 
@@ -65,8 +73,6 @@ app.use(hpp({ // whitelist some parameters
     ]
 }))
 
-// Define the route for the Public folder to be accessible
-app.use(express.static(`${__dirname}/public`))
 
 // Test middleware
 app.use((req, res, next) => {
@@ -78,6 +84,10 @@ app.use((req, res, next) => {
 
 
 // ROUTES - middlewares for specific routes
+app.get('/', (req, res) => {
+    res.status(200).render('base')
+})
+
 app.use('/api/v1/tours', tourRouter) // for this specific route - MOUNTING the router
 app.use('/api/v1/users', userRouter) // for this specific route - MOUNTING the router
 app.use('/api/v1/reviews', reviewRouter) // reviews in tours route
