@@ -40,6 +40,17 @@ router.route('/monthly-plan/:year')
         tourController.getMonthlyPlan
     )
 
+// Geospacial Queries
+router.route('/tours-within/:distance/center/:latlng/unit/:unit')
+    .get( tourController.getToursWithin)
+// /tours-within/distance/233/center/-40,45/unit/km
+// other way /tours-within?distance=233&center=-40,45&unit=km
+
+
+// distance from a certain point
+router.route('/distances/:latlng/unit/:unit')
+    .get(tourController.getDistances)
+
 
 // ROUTES
 router.route('/')

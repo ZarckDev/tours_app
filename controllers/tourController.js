@@ -1,7 +1,7 @@
 //Model
 const Tour = require('../models/tourModel');
 //Utils
-
+const AppError = require('../utils/appError')
 const catchAsync = require('../utils/catchAsync')
 
 // Factory
@@ -132,4 +132,81 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
             plan
         }
     })
+})
+
+
+//router.route('/tours-within/:distance/center/:latlng/unit/:unit',....
+// /tours-within/233/center/34.111745,-118.113491/unit/km
+exports.getToursWithin = catchAsync(async(req, res, next) => {
+    const { distance, latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(','); // get separates values (destructuring)
+
+    if(!distance || !unit){
+        return next(new AppError('Please provide distance and unit', 400))
+    }
+
+    //to radiant - divided by the radius of the earth
+    const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1; // else for "km"
+
+
+    if(!lat || !lng){
+        return next(new AppError('Please provide latitude and longitude in the format lat,lng', 400))
+    }
+
+    // to do geospacial queries, we need to add an index to startLocation
+    const tours = await Tour.find({ 
+        startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } } 
+    });
+
+    console.log(distance, lat, lng, unit);
+    
+    res.status(200).json({
+        status: 'success',
+        results: tours.length,
+        data: {
+            tours
+        }
+    })
+})
+
+exports.getDistances = catchAsync(async(req, res, next) => {
+    const { latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(','); // get separates values (destructuring)
+
+    if(!lat || !lng || !unit){
+        return next(new AppError('Please provide the correct parameters', 400))
+    }
+    
+    const multiplier = unit === 'mi' ? 0.000621371 : 0.001 // same as /1000 for km (but we want in meter here)
+    // 1m = 0.000621371 mil
+    
+    const distances = await Tour.aggregate([
+        {
+            // geoNear always need to be the first field, need a geospacial index (startLocation)
+            $geoNear: { // error, not the first cause of pre(aggregate in tourModel
+                near: {
+                    type: 'Point',
+                    coordinates: [lng *1, lat*1] //convert to number
+                },
+                distanceField: 'distance', // add the 'distance' field to tours
+                distanceMultiplier: multiplier
+            }
+        },
+        {
+            $project: { // names that the fields we want to keep
+                distance: 1,
+                name:1
+            }
+        }
+    ])
+
+
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            data: distances
+        }
+    })
+    
 })

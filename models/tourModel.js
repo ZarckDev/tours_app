@@ -139,6 +139,10 @@ tourSchema.index({price: 1, ratingsAverage: -1}); // price low to high, ratings 
 //cost of index is IMPORTANT - BE CAREFUL
 // we could use slugy to query a tour
 tourSchema.index({ slug: 1 });
+// for GeoSpacial query
+tourSchema.index({ startLocation: '2dsphere' }); // startLocation should be index as 2dsphere -- accesible on a map
+
+//Index : It's to provide a reasonable level of performance. Without an index, MongoDB has to scan every single document in the collection and perform the calculations to see if it matches the query.
 
 
 //Virtual Properties -> not stored in Database
@@ -214,12 +218,19 @@ tourSchema.pre(/^find/, function(next) {
 
 // AGGREGATION middleware -- before or after an aggregation happens
 tourSchema.pre('aggregate', function(next) {
-    // exclude the secret tours from this aggregation!
-    this.pipeline().unshift({ $match: { secretTour: { $ne: true }}}) //add at the beggining of an array
-    // console.log(this.pipeline());
-    // this points to the current aggregation object
+    const firstQuery = Object.keys(this.pipeline()[0]);
+    // be sure if we have geoNear, that this is the first one !!!
+    if (firstQuery[0] !== '$geoNear') {
+        // exclude the secret tours from this aggregation!
+        this.pipeline().unshift({ $match: { secretTour: { $ne: true }}}) //add at the beggining of an array
+        // this points to the current aggregation object
+    } else {
+        this.pipeline().splice(1, 0, { $match: { secretTour: { $ne: true } } });
+    }
+    console.log(this.pipeline());
     next();
 })
+
 
 
 const Tour = mongoose.model('Tour', tourSchema)
