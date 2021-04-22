@@ -34,6 +34,12 @@ const reviewSchema = new mongoose.Schema({
 })
 
 
+// Use Indexes for avoid duplicate review for One User
+reviewSchema.index({ tour: 1, user: 1}, { unique: true }) // a review can only have One association of tour/user
+// we get duplicate Key error if someone try
+
+
+
 reviewSchema.pre(/^find/, function(next) {
     // this.populate({
     //   path: 'tour',

@@ -46,6 +46,7 @@ const tourSchema = new mongoose.Schema({
         //validators for Number (work for dates too)
         min: [1, 'Rating must be above 1.0'],
         max: [5, 'Rating must be below 5.0'],
+        set: val => val.toFixed(1) // toFixed gives a string, but Mongoose seems to convert to Double
     },
     ratingsQuantity: {
         type: Number,
