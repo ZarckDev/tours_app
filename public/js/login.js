@@ -1,8 +1,13 @@
 // import { showAlert } from './alerts'
 
+const loginForm = document.querySelector('.form')
+const logOutBtn = document.querySelector('.nav__el--logout');
+
+
 const hideAlert = () => {
     const el = document.querySelector('.alert');
     if(el) el.parentElement.removeChild(el); // go trhough the parent to delete the alert
+    // OR el.remove();
 }
 
 // type is 'success' or 'error'
@@ -46,10 +51,34 @@ const login = async (email, password) => {
     
 }
 
-const form = document.querySelector('form').addEventListener('submit', function (event) {
-    event.preventDefault()
+const logout= async () => {
+    try {
+        const res = await axios({
+            method: 'GET',
+            url: 'http://localhost:3000/api/v1/users/logout'
+        });
+        //reload manually    
+        if(res.data.status === 'success'){
+            location.assign('/') // redirect to home
+            showAlert(res.data.status, 'Logged out successfully!')
+        }
+    } catch(err){
+        showAlert('error', 'Error logging out! Try again')
+        console.log(err.response)
+    }
+}
 
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    login(email, password)
-})
+if(loginForm){
+    loginForm.addEventListener('submit', function (event) {
+        event.preventDefault()
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        login(email, password)
+    })
+}
+
+if(logOutBtn) {
+    logOutBtn.addEventListener('click', logout)
+}
+
+
