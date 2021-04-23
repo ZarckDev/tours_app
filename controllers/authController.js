@@ -124,7 +124,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     // Standard for token is under Authorization header with Bearer in front of the token value
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
         token = req.headers.authorization.split(' ')[1]; // second element after Bearer
-    } else if(req.cookies.jwt){
+    } else if(req.cookies.jwt && req.cookies.jwt !== 'loggedout'){
         token = req.cookies.jwt; // cookie from browser
     }
 
@@ -156,6 +156,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     // GRANT ACCESS TO PROTECTED ROUTE -- EVRYTHING ABOVE WENT WELL
     // put the user data on the request for the next journey
     req.user = currentUser;
+    res.locals.user = currentUser // set the user in the locals
     next();
 })
 
