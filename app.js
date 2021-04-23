@@ -18,6 +18,7 @@ const globalErrorHandler = require('./controllers/errorController')
 const tourRouter = require('./routes/tourRoutes')
 const userRouter = require('./routes/userRoutes')
 const reviewRouter = require('./routes/reviewRoutes')
+const viewRouter = require('./routes/viewRoutes')
 
 const app = express();
 
@@ -39,6 +40,45 @@ if(process.env.NODE_ENV === 'development'){
 
 //Use helmet to protect HTTP Header
 app.use(helmet());// issue with contentSecurityPolicy() which is set by default
+
+// Further HELMET configuration for Security Policy (CSP)
+const scriptSrcUrls = [
+    "https://api.tiles.mapbox.com/",
+    "https://api.mapbox.com/",
+];
+const styleSrcUrls = [
+    "https://api.mapbox.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://fonts.googleapis.com/",
+];
+const connectSrcUrls = [
+    "https://api.mapbox.com/",
+    "https://a.tiles.mapbox.com/",
+    "https://b.tiles.mapbox.com/",
+    "https://events.mapbox.com/",
+];
+const fontSrcUrls = [
+    'fonts.googleapis.com',
+    'fonts.gstatic.com'
+];
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "'self'",
+                "blob:",
+                "data:"
+            ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
 
 //limite the requests (if atttacks -- Brute force)
 const limiter = rateLimit({
@@ -84,13 +124,8 @@ app.use((req, res, next) => {
 
 
 // ROUTES - middlewares for specific routes
-app.get('/', (req, res) => {
-    res.status(200).render('overview', {
-        tour:'The Forest Hiker',
-        user:'Marc'
-    })
-})
-
+app.use('/', viewRouter);
+//API
 app.use('/api/v1/tours', tourRouter) // for this specific route - MOUNTING the router
 app.use('/api/v1/users', userRouter) // for this specific route - MOUNTING the router
 app.use('/api/v1/reviews', reviewRouter) // reviews in tours route
