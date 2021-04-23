@@ -4,27 +4,6 @@ const loginForm = document.querySelector('.form--login')
 const logOutBtn = document.querySelector('.nav__el--logout');
 
 
-const hideAlert = () => {
-    const el = document.querySelector('.alert');
-    if(el) el.parentElement.removeChild(el); // go trhough the parent to delete the alert
-    // OR el.remove();
-}
-
-// type is 'success' or 'error'
-const showAlert = (type, msg) => {
-    // hide the alert that exists -- in all case
-    hideAlert()
-
-    const markup = `<div class='alert alert--${type}'>${msg}</div>`; // class from style.css
-
-    document.querySelector('body').insertAdjacentHTML('afterbegin', markup) // inside of the body but right at the beginning
-
-    // hide the alert after 5s
-    window.setTimeout(hideAlert, 5000)
-}
-
-
-
 // example using javascript to submit a form -- Other way is using HTML form
 const login = async (email, password) => {
 
@@ -68,6 +47,8 @@ const logout= async () => {
     }
 }
 
+
+
 if(loginForm){
     loginForm.addEventListener('submit', function (event) {
         event.preventDefault()
@@ -80,5 +61,3 @@ if(loginForm){
 if(logOutBtn) {
     logOutBtn.addEventListener('click', logout)
 }
-
-
