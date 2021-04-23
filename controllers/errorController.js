@@ -1,3 +1,4 @@
+const { collection } = require('../models/tourModel');
 const AppError = require('../utils/appError');
 
 
@@ -27,32 +28,66 @@ const handleJWTError = () => new AppError('Invalid token. Please log in again!',
 const handleJWTExpired = () => new AppError('Your token has expired! Please log in again.', 401)
 
 
-const sendErrorDev = (err, res) => {
-    res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message,
-        error: err,
-        stack: err.stack
+const sendErrorDev = (err, req, res) => {
+
+    if(req.originalUrl.startsWith('/api')){ // if error on our API
+        return res.status(err.statusCode).json({
+            status: err.status,
+            message: err.message,
+            error: err,
+            stack: err.stack
+        })
+    } 
+    // Otherwise
+    // on rendering
+    console.error('ERROR💥 ', err);
+    res.status(err.statusCode).render('error', {
+        title: 'Something went wrong!',
+        msg: err.message
     })
+    
 }
 
-const sendErrorProd = (err, res) => {
-    // operational, trusted error: send message to Client
-    if(err.isOperational) {
-        res.status(err.statusCode).json({
-            status: err.status,
-            message: err.message
-        })
-    } else { // Programming or other unknown error, don't leak error details to the client
+const sendErrorProd = (err, req, res) => {
+
+    //FOR THE API
+    if(req.originalUrl.startsWith('/api')){
+        // operational, trusted error: send message to Client
+        if(err.isOperational) {
+            return res.status(err.statusCode).json({
+                status: err.status,
+                message: err.message
+            })
+        } 
+        //otherwise
+        // Programming or other unknown error, don't leak error details to the client
         // 1) Log the error to the console
         console.error('ERROR💥 ', err);
         // 2) Send a generic message
-        res.status(500).json({
+        return res.status(500).json({
             status: 'error',
             message: 'Something went very wrong'
         }); 
-    }
-    
+        
+    } 
+    // Otherwise
+    // FOR PRODUCTION RENDERING WEBSITE
+    if(err.isOperational) {
+        return res.status(err.statusCode).render('error', {
+            title: 'Something went wrong!',
+            msg: err.message
+        })
+    } 
+    //otherwise
+    // Programming or other unknown error, don't leak error details to the client
+    // 1) Log the error to the console
+    console.error('ERROR💥 ', err);
+    // 2) Send a generic message
+    res.status(err.statusCode).render('error', {
+        title: 'Something went wrong!',
+        msg: 'Please try again later'
+    })
+
 }
 
 
@@ -62,11 +97,12 @@ module.exports = (err, req, res, next) => { // this 4 parameters, Express recogn
 
     
     if(process.env.NODE_ENV === 'development'){ // errors with details
-        sendErrorDev(err, res);
+        sendErrorDev(err, req, res);
     } else { // production
     // else if(process.env.NODE_ENV === 'production'){  // WEIRD BEHAVIOUR ON WINDOWS
         // nice errors in production
-        let error = {...err};
+        let error = {...err}; 
+        error.message = err.message; // need this for Production
 
         // Operational errors -- only in PRODUCTION
         if(err.name === 'CastError') error = handleCastErrorDB(err); // -- wrong id format example
@@ -76,6 +112,6 @@ module.exports = (err, req, res, next) => { // this 4 parameters, Express recogn
         if(err.name === 'TokenExpiredError') error = handleJWTExpired(); // When the token of the user expired, and try to access a protected route with this old token
         
         // Operational and non operational (default) errors send
-        sendErrorProd(error, res);
+        sendErrorProd(error, req, res);
     }
 }

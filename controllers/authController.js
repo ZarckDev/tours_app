@@ -112,8 +112,8 @@ exports.isLoggedIn = async (req, res, next) => {
 
 exports.logout = (req, res) => {
     //delete the cookie immediately by setting time to the past
-    res.cookie('jwt', 'null', { expires: new Date(Date.now() -10 * 1000), httpOnly: true});
-    // res.clearCookie('jwt')
+    // res.cookie('jwt', 'null', { expires: new Date(Date.now() -10 * 1000), httpOnly: true});
+    res.clearCookie('jwt')
     res.status(200).json({ status: 'success'})
 }
 
