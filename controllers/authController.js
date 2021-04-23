@@ -77,6 +77,35 @@ exports.login = catchAsync(async(req, res, next) => {
 })
 
 
+//For rendered pages -- ONLY -- Not supposed to protect route
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+
+    if(req.cookies.jwt){
+      // cookie from browser
+        const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET)
+      
+        // 2) user still exists
+        const currentUser = await User.findById(decoded.id);
+        if(!currentUser){
+            return next()
+        }
+
+        // 4) Check if user changed password after the token was issued (if password changed, give a new web token on login)
+        // see userModel for method in userSchema
+        if(currentUser.changedPasswordAfter(decoded.iat)){ // iat for "issued at", when the token was delivered
+            return next()
+        }
+
+
+        // THESE IS A LOGGED IN USER
+        res.locals.user = currentUser // set the user in the locals
+        return next();
+    }
+    // no JWT cookie -- no logged in user
+    next();
+})
+
+
 exports.protect = catchAsync(async (req, res, next) => {
     let token;
     // 1) Getting incoming token and check if it's there
