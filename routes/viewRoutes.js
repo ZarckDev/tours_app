@@ -7,8 +7,9 @@ const router = express.Router();
 
 
 router.get('/', viewsController.getOverview)
-
 router.get('/tour/:name', viewsController.getTour)
+
+router.get('/login', viewsController.getLoginForm)
 
 
 

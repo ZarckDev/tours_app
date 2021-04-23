@@ -10,6 +10,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize')
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser')
 
 const AppError = require('./utils/appError');
 
@@ -30,6 +31,9 @@ app.set('views', path.join(__dirname, 'views'))
 // app.use(express.static(`${__dirname}/public`))
 app.use(express.static(path.join(__dirname, 'public')))
 
+//Setting Express to parse body for post request (if not, empty body...)
+// app.use(express.urlencoded({extended: true})); -- WE DO NOT USE BODY OF FORM
+
 // GLOBAL MIDDLEWARES - for all the routes
 
 // Devepment logging
@@ -45,6 +49,7 @@ app.use(helmet());// issue with contentSecurityPolicy() which is set by default
 const scriptSrcUrls = [
     "https://api.tiles.mapbox.com/",
     "https://api.mapbox.com/",
+    "https://cdnjs.cloudflare.com/",
 ];
 const styleSrcUrls = [
     "https://api.mapbox.com/",
@@ -92,7 +97,7 @@ app.use('/api', limiter) // all routes that starts with '/api'
 app.use(express.json({ // options to limit the amount of data sent in the body for SECURITY
     limit: '10kb' // limit of 10k bytes
 }));
-
+app.use(cookieParser())// parse data from cookies, for login token in particular
 
 // Clean the data (using sanitization) again NoSQL query injection
 app.use(mongoSanitize())
@@ -118,7 +123,7 @@ app.use(hpp({ // whitelist some parameters
 app.use((req, res, next) => {
     req.requestTime = new Date().toISOString(); // if we want the time for every request
     // console.log(req.headers);
-    
+    console.log(req.cookies);
     next();
 })
 
