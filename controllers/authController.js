@@ -83,6 +83,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     // Standard for token is under Authorization header with Bearer in front of the token value
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
         token = req.headers.authorization.split(' ')[1]; // second element after Bearer
+    } else if(req.cookies.jwt){
+        token = req.cookies.jwt; // cookie from browser
     }
 
     if(!token){ // no token sent --> no logged in
