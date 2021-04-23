@@ -11,6 +11,7 @@ const mongoSanitize = require('express-mongo-sanitize')
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser')
+// const methodOverride = require('method-override'); // for PATCH/PUT/DELETE request that doesnt exists in HTML
 
 const AppError = require('./utils/appError');
 
@@ -30,9 +31,6 @@ app.set('views', path.join(__dirname, 'views'))
 // Define the route for the Public folder to be accessible (for files in /public requests)
 // app.use(express.static(`${__dirname}/public`))
 app.use(express.static(path.join(__dirname, 'public')))
-
-//Setting Express to parse body for post request (if not, empty body...)
-// app.use(express.urlencoded({extended: true})); -- WE DO NOT USE BODY OF FORM
 
 // GLOBAL MIDDLEWARES - for all the routes
 
@@ -98,6 +96,11 @@ app.use(express.json({ // options to limit the amount of data sent in the body f
     limit: '10kb' // limit of 10k bytes
 }));
 app.use(cookieParser())// parse data from cookies, for login token in particular
+//Setting Express to parse body for HTML post request (if not, empty body...)
+app.use(express.urlencoded({extended: true, limit: '10kb'})); // for account example form post
+
+//Setting for method override
+// app.use(methodOverride('_method'));
 
 // Clean the data (using sanitization) again NoSQL query injection
 app.use(mongoSanitize())

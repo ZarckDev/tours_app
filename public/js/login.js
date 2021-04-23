@@ -1,6 +1,6 @@
 // import { showAlert } from './alerts'
 
-const loginForm = document.querySelector('.form')
+const loginForm = document.querySelector('.form--login')
 const logOutBtn = document.querySelector('.nav__el--logout');
 
 

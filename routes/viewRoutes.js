@@ -13,6 +13,10 @@ router.get('/tour/:name', authController.isLoggedIn, viewsController.getTour)
 router.get('/login', authController.isLoggedIn, viewsController.getLoginForm)
 router.get('/me', authController.protect, viewsController.getAccount)
 
+// THIS FUNCTION IS FOR FORM SUBMITTED DIRECTLY FROM HTML -- EXAMPLE WHEN WE DON'T HAVE AN API
+// router.patch('/submit-user-data', authController.protect, viewsController.updateUserData) -- with method-override
+router.post('/submit-user-data', authController.protect, viewsController.updateUserData)
+
 
 
 

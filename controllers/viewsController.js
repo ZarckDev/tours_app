@@ -2,7 +2,7 @@
 //Utils
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
-
+const User = require('../models/userModel')
 const Tour = require('../models/tourModel')
 
 
@@ -54,3 +54,22 @@ exports.getAccount = (req, res) => {
         title: `Your account`
     })
 }
+
+// THIS FUNCTION IS FOR FORM SUBMITTED DIRECTLY FROM HTML -- EXAMPLE WHEN WE DON'T HAVE AN API
+exports.updateUserData = catchAsync(async(req, res, next) => {
+    // console.log('UPDATING USER: ', req.body)
+    // password handle separately, because we can't use findByIdAndUpdate, it will not run ou save() middleware for encryption
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, { // specify field to avoid malicious additional input data
+        name: req.body.name,
+        email: req.body.email
+    },
+    {
+        new: true, // return the new user
+        runValidators: true
+    });
+
+    res.status(200).render('account', {
+        title: `Your account`,
+        user: updatedUser
+    })
+})
