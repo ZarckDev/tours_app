@@ -2,7 +2,7 @@
 
 const loginForm = document.querySelector('.form--login')
 const logOutBtn = document.querySelector('.nav__el--logout');
-
+const btnLogIn = document.querySelector('.btn--log-in')
 
 // example using javascript to submit a form -- Other way is using HTML form
 const login = async (email, password) => {
@@ -50,11 +50,14 @@ const logout= async () => {
 
 
 if(loginForm){
-    loginForm.addEventListener('submit', function (event) {
+    loginForm.addEventListener('submit', async (event) => {
         event.preventDefault()
+        btnLogIn.textContent = "Please wait..."
+
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-        login(email, password)
+        await login(email, password);
+        btnLogIn.textContent = "Login"
     })
 }
 

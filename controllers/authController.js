@@ -255,7 +255,7 @@ exports.updatePassword = catchAsync(async(req, res, next) => {
 
     // 2) Check if the POSTed password is correct (old password)
     if(!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
-        return next(new AppError('Your curretn password is wrong', 401))
+        return next(new AppError('Your current password is wrong', 401))
     }
 
     // 3) If so, update the password
@@ -268,5 +268,5 @@ exports.updatePassword = catchAsync(async(req, res, next) => {
     // AND ALSO, The validator in model for passwordConfirm WILL NOT WORK (Only on save() and create())
 
     // 4) Log user in automatically, send JWT
-    createSendToken(user, 200, res)
+    createSendToken(user, 200, res) // new cookie to stay log in
 })
