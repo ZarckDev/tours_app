@@ -10,13 +10,19 @@ module.exports = class Email {
         this.to = user.email;
         this.firstName = user.name.split(' ')[0]; // only first name
         this.url = url;
-        this.from = `Marc👻 <${process.env.EMAIL_FROM}>`
+        this.from = `${process.env.EMAIL_FROM}`
     }
 
     newTransport() { // logic of transport here
         if(process.env.NODE_ENV === 'production'){
-            // Sendgrid
-            return 1;
+            // Sendgrid -- already predefined in nodemailer
+            return nodemailer.createTransport({ 
+                service: 'SendGrid', // nodemailer already know the host and port
+                auth: {
+                    user: process.env.SENDGRID_USERNAME,
+                    pass: process.env.SENDGRID_PASSWORD
+                }
+            });
         }
         // otherwise we use mailtrap.io for dev !!!
         return nodemailer.createTransport({ 

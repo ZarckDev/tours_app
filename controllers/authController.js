@@ -56,7 +56,7 @@ exports.signup = catchAsync(async(req, res, next) => { // next is for catchAsync
     if (process.env.NODE_ENV === 'production') {
         url = `${req.protocol}://${req.get('host')}/me`;
     }
-    console.log(url)
+
     await new Email(newUser, url).sendWelcome();
 
     // Only after email sent -- wait that is finished
