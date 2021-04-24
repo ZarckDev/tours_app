@@ -80,6 +80,7 @@ exports.getOne = (Model, populateOptions) =>
         if(populateOptions) query = query.populate(populateOptions)
 
         const doc = await query;
+
         
         // .populate({  /// ADDED IN QUERY MIDDLEWARE INSTEAD (IN TOURMODEL), TO BE USE BY DEFAULT IN ALL FIND QUERY
         //     path: 'guides',

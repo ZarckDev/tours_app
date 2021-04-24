@@ -65,7 +65,9 @@ router.route('/:id')
     .get(tourController.getTour) // a tour is visible to everyone
     .patch(
         authController.protect, // only logged In
-        authController.restrictTo('admin', 'lead-guide'), // only admin and lead-guide can update a tour
+        authController.restrictTo('admin', 'lead-guide'), // only admin and lead-guide can update a tour -- ISSUE, ALL LEAD-GUIDE CAN MODIFY ANY OTHER TOUR 
+        tourController.uploadTourImages,
+        tourController.resizeTourImages,
         tourController.updateTour
     )
     .delete(

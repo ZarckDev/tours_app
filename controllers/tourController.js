@@ -1,3 +1,5 @@
+const multer = require('multer')
+const sharp = require('sharp')
 //Model
 const Tour = require('../models/tourModel');
 //Utils
@@ -6,6 +8,71 @@ const catchAsync = require('../utils/catchAsync')
 
 // Factory
 const factory = require('./handlerFactory')
+
+
+// Store as a buffer instead, in memory
+const multerStorage = multer.memoryStorage();
+
+// file filtering -- only image
+const multerFilter = (req, file, cb) => {
+    //work for all kind of file we want to upload. here we want image
+    if(file.mimetype.startsWith('image')) {
+        cb(null, true)
+    } else {
+        cb(new AppError('Not an image! Please upload only images', 400), false)
+    }
+}
+
+// upload define settings
+const upload = multer({
+    storage: multerStorage,
+    fileFilter: multerFilter
+}) 
+
+// multiple files
+exports.uploadTourImages = upload.fields([
+    {name: 'imageCover', maxCount: 1},
+    {name: 'images', maxCount: 3} //names sould match the Model
+])
+
+// upload.single('image') // Only single image -> req.file
+// upload.array('images', 5) // for multiple images directly -> req.fileS (even the single image is in an array)
+// upload.fields() // mix of single and multiple -> req.fileS
+
+
+exports.resizeTourImages = catchAsync(async(req, res, next) => {
+    if(!req.files.imageCover || !req.files.images) return next(); // if no files in request
+
+    //Process Cover image
+    const imageCoverFilename = `tour-${req.params.id}-${Date.now()}-cover.jpeg` // id is in the URL
+    await sharp(req.files.imageCover[0].buffer)// imageCover is an array, even for unique photo becaus ewe used upload.fields
+        .resize(2000, 1333)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 }) // compress a bit
+        .toFile(`public/img/tours/${imageCoverFilename}`) // output the file
+    // updateTour take the body to update
+    req.body.imageCover = imageCoverFilename; // copy the name of the file
+
+    //Process Tour images
+    req.body.images = [];
+ 
+    await Promise.all( // need this, because async would not work in the loop
+        req.files.images.map(async (file, idx) => { // need map(), not forEach(), because we want to save Promises
+            // temp file name
+            const filename = `tour-${req.params.id}-${Date.now()}-${idx+1}.jpeg`;
+            await sharp(req.files.images[idx].buffer)// imageCover is an array, even for unique photo becaus ewe used upload.fields
+            .resize(2000, 1333)
+            .toFormat('jpeg')
+            .jpeg({ quality: 90 }) // compress a bit
+            .toFile(`public/img/tours/${filename}`) // output the file
+
+            req.body.images.push(filename);
+        })
+    )
+
+    next(); // to update tour middleware
+})
+
 
 // ROUTES HANDLERS SPECIFIC API REQUESTS
 // Top 5 middleware

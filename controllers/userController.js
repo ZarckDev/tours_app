@@ -47,23 +47,23 @@ const upload = multer({
 exports.uploadUserPhoto = upload.single('photo'); //middleware, single file with name of the field  ---- 'photo' ---- IN REQUEST -- calls next() automatically
 
 
-exports.resizeUserPhoto = (req, res, next) => {
+exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
     if(!req.file) return next(); // if no file in request
 
     // filename not defined becaus we are in buffer now, memory, and we need it in updateMe middleware
     req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`
 
     // otherwise we have a file
-    sharp(req.file.buffer)// buffer from multerStorage -- memory
+    await sharp(req.file.buffer)// buffer from multerStorage -- memory
         .resize(500, 500)
         .toFormat('jpeg')
         .jpeg({ quality: 90 }) // compress a bit
         .toFile(`public/img/users/${req.file.filename}`) // output the file
     
     next(); // to updateMe middleware
-}
+})
 
-const deletePhotoFromServer = async photo => {
+const deletePhotoFromServer = catchAsync(async photo => {
     if (photo.startsWith('default')) return; // should not delete the default
     
     const path = `${__dirname}/../public/img/users/${photo}`;
@@ -71,7 +71,7 @@ const deletePhotoFromServer = async photo => {
         if (err) return console.log(err);
         console.log('Previous photo has been deleted');
     });
-};
+})
 
 const filterObj = (obj, ...allowedfields) => {
     const newObj = {}
