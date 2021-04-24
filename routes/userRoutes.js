@@ -26,7 +26,7 @@ router.use(authController.protect)
 //routes
 router.patch('/updateMyPassword', authController.updatePassword) // protect ensure we are logged in and so put the user in the request object
 router.get('/me', userController.getMe, userController.getUser)// protect set the req.user, getMe put the user as a param id to fake the getUser
-router.patch('/updateMe', userController.uploadUserPhoto, userController.updateMe) // new  middleware will put the file in the req object
+router.patch('/updateMe', userController.uploadUserPhoto, userController.resizeUserPhoto, userController.updateMe) // new  middleware will put the file in the req object
 router.delete('/deleteMe', userController.deleteMe)
 
 

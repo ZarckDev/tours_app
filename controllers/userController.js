@@ -1,4 +1,5 @@
 const multer = require('multer')
+const sharp = require('sharp')
 //Model
 const User = require('../models/userModel');
 //Utils
@@ -10,17 +11,22 @@ const factory = require('./handlerFactory')
 
 
 // UPLOAD IMAGE -- MULTER
-const multerStorage = multer.diskStorage({// in our file system
-    destination: (req, file, cb) => {
-        cb(null, 'public/img/users');
-    },
-    filename: (req, file, cb) => {
-        // user-<id>-<timestamp>.jpeg
-        const ext = file.mimetype.split('/')[1]; // mimetype:'image/jpeg'
-        cb(null, `user-${req.user.id}-${Date.now()}.${ext}`)
-    }
-}) 
+// diskstorage -- folder path and filename -- best to store in memory instead of DISK
+// const multerStorage = multer.diskStorage({// in our file system
+//     destination: (req, file, cb) => {
+//         cb(null, 'public/img/users');
+//     },
+//     filename: (req, file, cb) => {
+//         // user-<id>-<timestamp>.jpeg
+//         const ext = file.mimetype.split('/')[1]; // mimetype:'image/jpeg'
+//         cb(null, `user-${req.user.id}-${Date.now()}.${ext}`)
+//     }
+// }) 
 
+// Store as a buffer instead, in memory
+const multerStorage = multer.memoryStorage();
+
+// file filtering -- only image
 const multerFilter = (req, file, cb) => {
     //work for all kind of file we want to upload. here we want image
     if(file.mimetype.startsWith('image')) {
@@ -36,9 +42,25 @@ const upload = multer({
     fileFilter: multerFilter
 }) 
 
-exports.uploadUserPhoto = upload.single('photo'); //middleware, single file with name of the field 'photo' 
+// upload photo middleware
+exports.uploadUserPhoto = upload.single('photo'); //middleware, single file with name of the field  ---- 'photo' ---- IN REQUEST -- calls next() automatically
 
 
+exports.resizeUserPhoto = (req, res, next) => {
+    if(!req.file) return next(); // if no file in request
+
+    // filename not defined becaus we are in buffer now, memory, and we need it in updateMe middleware
+    req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`
+
+    // otherwise we have a file
+    sharp(req.file.buffer)// buffer from multerStorage -- memory
+        .resize(500, 500)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 }) // compress a bit
+        .toFile(`public/img/users/${req.file.filename}`)
+    
+    next(); // to updateMe middleware
+}
 
 const filterObj = (obj, ...allowedfields) => {
     const newObj = {}
@@ -59,8 +81,6 @@ exports.getMe = (req, res, next) => {
 
 // 'user' can update some fields (name, email) -- not in the same route/ place as update password
 exports.updateMe = catchAsync(async(req, res, next) => {
-    console.log(req.file) // from multer upload previous middleware
-    console.log(req.body)
 
     // 1) Create error if user POSTs password data
     if(req.body.password || req.body.passwordConfirm){
@@ -73,6 +93,7 @@ exports.updateMe = catchAsync(async(req, res, next) => {
     // we don't want to pass the body, because the user could send body.role: 'admin' ....
     // only contains mail or name, we need to filter the body
     const filteredBody = filterObj(req.body, 'name', 'email');
+    if(req.file) filteredBody.photo = req.file.filename; // user-<id>-<timestamp>.jpeg
     //  3) Update user document
     const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
         new:true, // return the updated document
