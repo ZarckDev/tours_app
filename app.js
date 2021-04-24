@@ -20,6 +20,7 @@ const globalErrorHandler = require('./controllers/errorController')
 const tourRouter = require('./routes/tourRoutes')
 const userRouter = require('./routes/userRoutes')
 const reviewRouter = require('./routes/reviewRoutes')
+const bookingRouter = require('./routes/bookingRoutes')
 const viewRouter = require('./routes/viewRoutes')
 
 const app = express();
@@ -48,6 +49,7 @@ const scriptSrcUrls = [
     "https://api.tiles.mapbox.com/",
     "https://api.mapbox.com/",
     "https://cdnjs.cloudflare.com/",
+    "https://js.stripe.com"
 ];
 const styleSrcUrls = [
     "https://api.mapbox.com/",
@@ -59,10 +61,15 @@ const connectSrcUrls = [
     "https://a.tiles.mapbox.com/",
     "https://b.tiles.mapbox.com/",
     "https://events.mapbox.com/",
+    "https://api.stripe.com"
 ];
 const fontSrcUrls = [
     'fonts.googleapis.com',
     'fonts.gstatic.com'
+];
+const frameSrcUrls = [
+    'https://js.stripe.com',
+    'https://hooks.stripe.com'
 ];
 app.use(
     helmet.contentSecurityPolicy({
@@ -72,6 +79,7 @@ app.use(
             scriptSrc: ["'self'", ...scriptSrcUrls],
             styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
             workerSrc: ["'self'", "blob:"],
+            frameSrc: ["self", ...frameSrcUrls],
             objectSrc: [],
             imgSrc: [
                 "'self'",
@@ -137,6 +145,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter) // for this specific route - MOUNTING the router
 app.use('/api/v1/users', userRouter) // for this specific route - MOUNTING the router
 app.use('/api/v1/reviews', reviewRouter) // reviews in tours route
+app.use('/api/v1/bookings', bookingRouter) // reviews in tours route
 
 
 // Unknown route middleware handler

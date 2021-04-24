@@ -17,6 +17,7 @@ block append head
     link(href='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet')
     //- defer for when content is loaded -- same a putting the script at the end
     script(src='/js/mapbox.js' defer)
+    script(src='https://js.stripe.com/v3/')
 
 block content 
     section.section-header
@@ -93,4 +94,10 @@ block content
             .cta__content
                 h2.heading-secondary What are you waiting for?
                 p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. Make it yours today!`
-                button.btn.btn--green.span-all-rows Book tour now!    
+                //- if logged in, then we have access to the user variable (thanks to protect() function)
+                if user
+                    button.btn.btn--green.span-all-rows#book-tour(data-tour-id=`${tour._id}`) Book tour now!    
+                else 
+                    a.btn.btn--green.span-all-rows(href="/login") Log in to book tour 
+
+    script(src='/js/stripe.js')

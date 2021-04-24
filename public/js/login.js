@@ -20,7 +20,8 @@ const login = async (email, password) => {
         if(res.data.status === 'success'){
             showAlert(res.data.status, 'Logged in successfully!')
             window.setTimeout(() => { // to let the message showed visible for 1,5s
-                location.assign('/') // redirect to home
+                // location.assign('/') // redirect to home - assign create new line in Browser History
+                location.replace('/') // redirect to home
             }, 1500)
         }
 
@@ -38,7 +39,7 @@ const logout= async () => {
         });
         //reload manually    
         if(res.data.status === 'success'){
-            location.assign('/') // redirect to home
+            location.replace('/') // redirect to home
             showAlert(res.data.status, 'Logged out successfully!')
         }
     } catch(err){
