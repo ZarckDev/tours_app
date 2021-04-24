@@ -1,5 +1,6 @@
 const multer = require('multer')
 const sharp = require('sharp')
+const fs = require('fs')
 //Model
 const User = require('../models/userModel');
 //Utils
@@ -11,7 +12,7 @@ const factory = require('./handlerFactory')
 
 
 // UPLOAD IMAGE -- MULTER
-// diskstorage -- folder path and filename -- best to store in memory instead of DISK
+// diskstorage -- folder path and filename -- best to store in memory instead of DISK IF USING IMAGE PROCESSING, LIKE RESIZE, CROP... AS WE DO HERE
 // const multerStorage = multer.diskStorage({// in our file system
 //     destination: (req, file, cb) => {
 //         cb(null, 'public/img/users');
@@ -57,10 +58,20 @@ exports.resizeUserPhoto = (req, res, next) => {
         .resize(500, 500)
         .toFormat('jpeg')
         .jpeg({ quality: 90 }) // compress a bit
-        .toFile(`public/img/users/${req.file.filename}`)
+        .toFile(`public/img/users/${req.file.filename}`) // output the file
     
     next(); // to updateMe middleware
 }
+
+const deletePhotoFromServer = async photo => {
+    if (photo.startsWith('default')) return; // should not delete the default
+    
+    const path = `${__dirname}/../public/img/users/${photo}`;
+    await fs.unlink(path, err => {
+        if (err) return console.log(err);
+        console.log('Previous photo has been deleted');
+    });
+};
 
 const filterObj = (obj, ...allowedfields) => {
     const newObj = {}
@@ -94,6 +105,10 @@ exports.updateMe = catchAsync(async(req, res, next) => {
     // only contains mail or name, we need to filter the body
     const filteredBody = filterObj(req.body, 'name', 'email');
     if(req.file) filteredBody.photo = req.file.filename; // user-<id>-<timestamp>.jpeg
+
+    // 2b) If uploading new photo, delete the old one from server.
+    if(req.file) await deletePhotoFromServer(req.user.photo)
+
     //  3) Update user document
     const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
         new:true, // return the updated document
