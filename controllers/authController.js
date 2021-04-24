@@ -198,18 +198,11 @@ exports.forgotPassword = catchAsync(async(req, res, next) => {
     //need to save in database
     await user.save({validateBeforeSave: false}); // disable the validation because we only update the passwordResetToken and passwordResetExpires here (we would have error not mentioning email and password if not) - because we don't have the password, we forgot it !
 
-    // 3) Send it to user's email
-    // url for click to request a new password
-    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}&${req.body.email}` // add email to make sure of unicity (if someone else managed to generate the same token...)
-
-    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL} \nIf you didn't forget your password, please ignore this email.`
-
     try {
-        // await sendEmail({
-        //     email: user.email,
-        //     subject: 'Your password reset token (valid for 10 min)',
-        //     message
-        // })
+        // url for click to request a new password
+        const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}&${req.body.email}` // add email to make sure of unicity (if someone else managed to generate the same token...)
+
+        await new Email(user, resetURL).sendPasswordReset();
 
         res.status(200).json({
             status: 'success',

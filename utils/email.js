@@ -53,7 +53,13 @@ module.exports = class Email {
     }
 
     async sendWelcome() {
+        // welcome is the pug file
         await this.send('welcome', 'Welcome to the Tours Family!') // async function
+    }
+
+    async sendPasswordReset() {
+        // passwordReset is the pug file
+        await this.send('passwordReset', 'Your password reset token (valid for only 10 minutes)')
     }
 }
 
