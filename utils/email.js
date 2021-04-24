@@ -1,52 +1,60 @@
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
+const pug = require('pug')
+const { htmlToText } = require('html-to-text')
 
 
-const sendEmail = async options => {
+// new Email(user, url).sendWelcome() // user contain email and name 
 
-    // 1) Create a transporter (service that will send the email -- SMTP transport)
-    const transporter = nodemailer.createTransport({ // we use mailtrap.io for dev !!!
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        auth: {
-            user: process.env.EMAIL_USERNAME,
-            pass: process.env.EMAIL_PASSWORD
-        }
-    });
-    // const transporter = nodemailer.createTransport({
-    //     service: 'Gmail',
-    //     auth: {
-    //         user: process.env.EMAIL_USERNAME,
-    //         pass: process.env.EMAIL_PASWWORD
-    //     }
-    //     // Activate in Gmail the "less secure app" option
-    //     // We are not using Gmail in this application, because not a good idea for real production app 
-    // })
-
-    // let transporter = nodemailer.createTransport({
-    //     host: "smtp.ethereal.email",
-    //     port: 587,
-    //     secure: false, // true for 465, false for other ports
-    //     auth: {
-    //       user: testAccount.user, // generated ethereal user
-    //       pass: testAccount.pass, // generated ethereal password
-    //     },
-    //   });
-
-
-    // 2) Define the email options
-    const mailOptions = {
-        from: '"admin 👻" <admin@jonas.io>', // sender address
-        to: options.email, // list of receivers
-        subject: options.subject, // Subject line
-        text: options.message, // plain text body
-        // html: "<b>Hello world?</b>", // html body
+module.exports = class Email {
+    constructor(user, url) {
+        this.to = user.email;
+        this.firstName = user.name.split(' ')[0]; // only first name
+        this.url = url;
+        this.from = `Marc👻 <${process.env.EMAIL_FROM}>`
     }
 
-    // 3) Actually send the email
-    let info = await transporter.sendMail(mailOptions) // asynchronous function so async/await
+    newTransport() { // logic of transport here
+        if(process.env.NODE_ENV === 'production'){
+            // Sendgrid
+            return 1;
+        }
+        // otherwise we use mailtrap.io for dev !!!
+        return nodemailer.createTransport({ 
+            host: process.env.EMAIL_HOST,
+            port: process.env.EMAIL_PORT,
+            auth: {
+                user: process.env.EMAIL_USERNAME,
+                pass: process.env.EMAIL_PASSWORD
+            }
+        });
+    }
 
-    console.log("Message sent: %s", info.messageId);
-    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+    async send(template, subject) {
+        // Send the actual email
+        // 1) render HTML for the email based on pug template
+        // PUG to real HTML
+        const html = pug.renderFile(`${__dirname}/../views/emails/${template}.pug`,{
+            firstName: this.firstName,
+            url: this.url,
+            subject
+        }) 
+
+        // 2) Define email options
+        const mailOptions = {
+            from: this.from, // sender address
+            to: this.to, // list of receivers
+            subject: subject, // Subject line
+            html: html,
+            text: htmlToText(html), // plain text body -- important for spam folders and email clients -- convert html to text content using Package html-to-text
+        }
+
+        // 3) create a transport and send email 
+        await this.newTransport().sendMail(mailOptions) // asynchronous function so async/await
+    }
+
+    async sendWelcome() {
+        await this.send('welcome', 'Welcome to the Tours Family!') // async function
+    }
 }
 
-module.exports = sendEmail;
+
