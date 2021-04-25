@@ -33,12 +33,16 @@ exports.getCheckoutSession = catchAsync(async(req, res, next) => {
         //about the product
         line_items: [
             {
-                name: `${tour.name} Tour`,
-                description: tour.summary,
-                images: [`${url}/img/tours/${tour.imageCover}`], // just a placeholder, we need a live image, so not possible to put localhost image
-                amount: tour.price * 100, // multiply by 100 because price is in CENTS
-                currency: 'usd',
-                quantity: 1
+                quantity: 1,
+                price_data: {
+                    currency: 'usd',
+                    unit_amount: tour.price * 100, // multiply by 100 because price is in CENTS
+                    product_data: {
+                        name: `${tour.name} Tour`,
+                        description: tour.summary,
+                        images: [`${url}/img/tours/${tour.imageCover}`], // just a placeholder, we need a live image, so not possible to put localhost image
+                    }
+                },
             },
         ],
     });
@@ -67,7 +71,7 @@ const createBookingCheckout = async session => {
     const tour = session.client_reference_id;
     // we also have the user email in session
     const user = (await User.findOne({ email: session.customer_email })).id;
-    const price = session.display_items[0].amount / 100; // back in $ dollars
+    const price = session.amount_total / 100; // back in $ dollars
 
     await Booking.create({tour, user, price});
 }
