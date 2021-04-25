@@ -35,7 +35,7 @@ exports.getCheckoutSession = catchAsync(async(req, res, next) => {
             {
                 name: `${tour.name} Tour`,
                 description: tour.summary,
-                images: ['https://www.natours.dev/img/tours/tour-1-cover.jpg'], // just a placeholder, we need a live image, so not possible to put localhost image
+                images: [`${url}/img/tours/${tour.imageCover}`], // just a placeholder, we need a live image, so not possible to put localhost image
                 amount: tour.price * 100, // multiply by 100 because price is in CENTS
                 currency: 'usd',
                 quantity: 1
@@ -90,7 +90,7 @@ exports.webhookCheckout = (req, res, next) => {
         return res.status(400).send(`Webhook error: ${err.message}`)
     }
 
-    if(event.type === 'checkout.session.complete') // event type webhook defined in Stripe dashboard
+    if(event.type === 'checkout.session.completed') // event type webhook defined in Stripe dashboard
         createBookingCheckout(event.data.object)
 
     res.status(200).json({ received: true })
