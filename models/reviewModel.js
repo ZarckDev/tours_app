@@ -72,7 +72,7 @@ reviewSchema.statics.calcAverageRatings = async function(tourId) {
             }
         }
     ]);
-    console.log(stats); // it's an array
+    // console.log(stats); // it's an array
 
     // persist the statistics into the Tour
     if(stats.length > 0){
@@ -102,7 +102,7 @@ reviewSchema.post('save', function() {
 reviewSchema.pre(/^findOneAnd/, async function(next) { // query middleware for updating or deleting a review
     // we store in "this.r", it is a technique to pass the property to the post() query
     this.r = await this.findOne(); // get the review document -- at this point it's the previous state of this review, we are in pre() but we just need the tourId so don't care
-    console.log(this.r);
+    // console.log(this.r);
     next();
 })
 

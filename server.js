@@ -34,7 +34,7 @@ mongoose.connect(DB_URL, {
 // START SERVER
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
-    console.log(`App running on port ${port}...`);
+    // console.log(`App running on port ${port}...`);
 })
 
 // SHOULD WE USE THE HANDLE BELOW ? OR MANAGING ERRORS AT THE RIGHT SPOTS

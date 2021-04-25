@@ -1,4 +1,4 @@
-console.log('Hello from the client side');
+// console.log('Hello from the client side');
 
 // dataset.locations for "data-locations"
 const locations = JSON.parse(document.getElementById('map').dataset.locations);

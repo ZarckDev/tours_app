@@ -198,12 +198,12 @@ tourSchema.pre(/^find/, function(next) { // all methods that starts with find (f
     next();
 })
 
-tourSchema.post(/^find/, function(docs, next) { // docs -- all documents returned by the query
-    console.log(`Query took ${Date.now()-this.start} milliseconds!`);
+// tourSchema.post(/^find/, function(docs, next) { // docs -- all documents returned by the query
+//     // console.log(`Query took ${Date.now()-this.start} milliseconds!`);
     
-    // console.log(docs);
-    next();
-})
+//     // console.log(docs);
+//     next();
+// })
 
 tourSchema.pre(/^find/, function(next) {
     // we can specify what we want to populate
@@ -227,7 +227,7 @@ tourSchema.pre('aggregate', function(next) {
     } else {
         this.pipeline().splice(1, 0, { $match: { secretTour: { $ne: true } } });
     }
-    console.log(this.pipeline());
+    // console.log(this.pipeline());
     next();
 })
 

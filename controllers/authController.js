@@ -224,7 +224,7 @@ exports.resetPassword = catchAsync(async(req, res, next) => {
     // in params, URL looks like this : /api/v1/users/resetPassword/db41106f266acee32759feb86a56fa4691047f01d0a78d332c8328a6da356cbc
     const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
 
-    console.log(hashedToken);
+    // console.log(hashedToken);
     
 
     //the token is the only thing right now that can identify the user

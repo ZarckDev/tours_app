@@ -11,6 +11,7 @@ const mongoSanitize = require('express-mongo-sanitize')
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser')
+const compression = require('compression')
 // const methodOverride = require('method-override'); // for PATCH/PUT/DELETE request that doesnt exists in HTML
 
 const AppError = require('./utils/appError');
@@ -36,7 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 // GLOBAL MIDDLEWARES - for all the routes
 
 // Devepment logging
-console.log(process.env.NODE_ENV)
+//console.log(process.env.NODE_ENV)
 if(process.env.NODE_ENV === 'development'){
     app.use(morgan('dev'));
 }
@@ -128,6 +129,9 @@ app.use(hpp({ // whitelist some parameters
         'price'
     ]
 }))
+
+// compression
+app.use(compression()); // compress all text sent to the client
 
 
 // Test middleware
