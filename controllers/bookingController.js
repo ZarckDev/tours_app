@@ -2,12 +2,14 @@ const stripe = require('stripe')(process.env.STRIPE_SECRETKEY) // direct pass th
 //Model
 const Tour = require('../models/tourModel');
 const Booking = require('../models/bookingModel')
+const User = require('../models/userModel')
 //Utils
 const AppError = require('../utils/appError')
 const catchAsync = require('../utils/catchAsync')
 
 // Factory
-const factory = require('./handlerFactory')
+const factory = require('./handlerFactory');
+const User = require('../models/userModel');
 
 exports.getCheckoutSession = catchAsync(async(req, res, next) => {
     const { tourId } = req.params;
@@ -24,7 +26,8 @@ exports.getCheckoutSession = catchAsync(async(req, res, next) => {
         //about the session
         payment_method_types: ['card'],
         mode: 'payment',
-        success_url: `${url}/?tour=${tourId}&user=${req.user.id}&price=${tour.price}`, // query string NOT SECURE, JUST TEMPORARY FOR LOCALHOST -- EVERYONE COULD CALL IT THROUGH THE CHECKOUT PROCESS
+        // success_url: `${url}/?tour=${tourId}&user=${req.user.id}&price=${tour.price}`, // query string NOT SECURE, JUST TEMPORARY FOR LOCALHOST -- EVERYONE COULD CALL IT THROUGH THE CHECKOUT PROCESS
+        success_url: `${url}/my-tours`,
         cancel_url: `${url}/tour/${tour.slug}`,
         customer_email: req.user.email,
         client_reference_id: tourId, // pass the data from the session
@@ -48,17 +51,51 @@ exports.getCheckoutSession = catchAsync(async(req, res, next) => {
     })
 })
 
-exports.createBookingCheckout = catchAsync(async(req, res, next) => {
-    // This is only TEMPORARY, UNSECURE: everyone can make bookings without paying!
-    const {tour, user, price} = req.query; // query string from success checkout
+// exports.createBookingCheckout = catchAsync(async(req, res, next) => {
+//     // This is only TEMPORARY, UNSECURE: everyone can make bookings without paying!
+//     const {tour, user, price} = req.query; // query string from success checkout
 
-    if(!tour || !user || !price) return next(); // next middleware in Home route ('/')
+//     if(!tour || !user || !price) return next(); // next middleware in Home route ('/')
+
+//     await Booking.create({tour, user, price});
+
+//     // redirect to the url WITHOUT the query string
+//     res.redirect(req.originalUrl.split('?')[0]); // remove the query string
+// })
+
+const createBookingCheckout = async session => {
+    // tour is in session, thanks to client_reference_id we specified
+    const tour = session.client_reference_id;
+    // we also have the user email in session
+    const user = (await User.findOne({ email: session.customer_email })).id;
+    const price = session.line_items[0].amount / 100; // back in $ dollars
 
     await Booking.create({tour, user, price});
+}
 
-    // redirect to the url WITHOUT the query string
-    res.redirect(req.originalUrl.split('?')[0]); // remove the query string
-})
+
+//Stripe webhook checkout
+exports.webhookCheckout = (req, res, next) => {
+    const signature = req.headers['stripe-signature'];
+
+    let event;
+
+    try {
+        // req.body here is in RAW form, that's why we put the declaration in app.js before everything
+        event = stripe.webhooks.constructEvent(
+            req.body, 
+            signature,
+            process.env.STRIPE_WEBHOOK_SECRET
+        );
+    } catch(err) {
+        return res.status(400).send(`Webhook error: ${err.message}`)
+    }
+
+    if(event.type === 'checkout.session.complete') // event type webhook defined in Stripe dashboard
+        createBookingCheckout(event.data.object)
+
+    res.status(200).json({ received: true })
+}
 
 
 // API

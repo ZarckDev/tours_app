@@ -25,6 +25,8 @@ const reviewRouter = require('./routes/reviewRoutes')
 const bookingRouter = require('./routes/bookingRoutes')
 const viewRouter = require('./routes/viewRoutes')
 
+const bookingController = require('./controllers/bookingController')
+
 const app = express();
 
 
@@ -116,6 +118,11 @@ const limiter = rateLimit({
     message: 'Too many requests from this IP, please try again in an hour!'
 })
 app.use('/api', limiter) // all routes that starts with '/api'
+
+//checkout webhook (see on Stripe account)
+// need to be here because need the body to not be JSON, and the middleware after parse the body to JSON, so we need to define this BEFORE -- Stripe send RAW
+app.post('/webhook-checkout', express.raw({type: 'application/json'}) ,bookingController.webhookCheckout)
+
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ // options to limit the amount of data sent in the body for SECURITY
