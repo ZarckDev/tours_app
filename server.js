@@ -49,3 +49,11 @@ process.on('unhandledRejection', err => { // any Promise rejection is handled he
     })
 })
 
+
+//SIGTERM SIGNAL FROM HEROKU -- to cause a program to stop running from heroku -- we need to shutdown safely -- every 24h heroku shutdown the app.
+process.on('SIGTERM', () => {
+    console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+    server.close(() => { // still handle the pending requests if there are some
+        console.log('💥 Process terminated!');
+    })
+})
