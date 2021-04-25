@@ -4,6 +4,7 @@ const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 const User = require('../models/userModel')
 const Tour = require('../models/tourModel')
+const Booking = require('../models/bookingModel')
 
 
 exports.getOverview = catchAsync(async(req, res, next) => {
@@ -70,5 +71,20 @@ exports.updateUserData = catchAsync(async(req, res, next) => {
     res.status(200).render('account', {
         title: `Your account`,
         user: updatedUser
+    })
+})
+
+
+exports.getMyTours = catchAsync(async(req, res, next) => { // or virtual populate on Tours
+    // 1) Find all bookings
+    const bookings = await Booking.find({ user: req.user.id })
+
+    // 2) Find tours with the returned IDs
+    const tourIds = bookings.map(el => el.tour); // et an array of tours
+    const tours = await Tour.find({ _id: { $in: tourIds}}); // select all tours that have an Id which is in the tourIds array
+
+    res.status(200).render('overview', { // 'overview page, maybe change to new account view
+        title: 'My Tours',
+        tours
     })
 })

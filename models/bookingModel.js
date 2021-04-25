@@ -28,6 +28,7 @@ const bookingSchema = mongoose.Schema({
 // populate tour and user automatically when there is a query
 bookingSchema.pre(/^find/, function (next){
     this.populate('user').populate({path: 'tour', select: 'name'})
+    next();
 })
 
 
