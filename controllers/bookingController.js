@@ -9,7 +9,6 @@ const catchAsync = require('../utils/catchAsync')
 
 // Factory
 const factory = require('./handlerFactory');
-const User = require('../models/userModel');
 
 exports.getCheckoutSession = catchAsync(async(req, res, next) => {
     const { tourId } = req.params;
