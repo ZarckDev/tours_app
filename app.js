@@ -12,6 +12,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser')
 const compression = require('compression')
+const cors = require('cors'); // for cros origin ressources -- API beeing accessible to every other domains
 // const methodOverride = require('method-override'); // for PATCH/PUT/DELETE request that doesnt exists in HTML
 
 const AppError = require('./utils/appError');
@@ -37,6 +38,20 @@ app.set('views', path.join(__dirname, 'views'))
 app.use(express.static(path.join(__dirname, 'public')))
 
 // GLOBAL MIDDLEWARES - for all the routes
+
+// Implement CORS - Access-Control-Allow-Origin
+app.use(cors()); // add specific headers for CORS - -WE COULD ONLY ADD cors() as a middleware for selecive routes if we want
+
+// api.natours.com, front-end natours.com  => different domains, so need to authorize the natours.com to do requests on api.natours.com => in this case:
+// app.use(cors({
+//     origin: 'https://www.natours.com' // allow access to this front-end url
+// }))
+
+// THIS ABOVE WORKS FOR GET and POST, but not the other words
+// need to add this:
+app.options('*', cors()); // options is another HTTP request (like get, post, etc)
+// for specific route
+// app.options('/api/v1/tours/:id', cors()) ; // only there pre-flag face, ONLY on this route, complex request can be done, example DELETE or PATCH
 
 // Devepment logging
 //console.log(process.env.NODE_ENV)
