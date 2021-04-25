@@ -1,6 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRETKEY) // direct pass the secret key
 //Model
 const Tour = require('../models/tourModel');
+const Booking = require('../models/bookingModel')
 //Utils
 const AppError = require('../utils/appError')
 const catchAsync = require('../utils/catchAsync')
@@ -23,7 +24,7 @@ exports.getCheckoutSession = catchAsync(async(req, res, next) => {
         //about the session
         payment_method_types: ['card'],
         mode: 'payment',
-        success_url: `${url}/`,
+        success_url: `${url}/?tour=${tourId}&user=${req.user.id}&price=${tour.price}`, // query string NOT SECURE, JUST TEMPORARY FOR LOCALHOST -- EVERYONE COULD CALL IT THROUGH THE CHECKOUT PROCESS
         cancel_url: `${url}/tour/${tour.slug}`,
         customer_email: req.user.email,
         client_reference_id: tourId, // pass the data from the session
@@ -45,4 +46,16 @@ exports.getCheckoutSession = catchAsync(async(req, res, next) => {
         status: 'success',
         session
     })
+})
+
+exports.createBookingCheckout = catchAsync(async(req, res, next) => {
+    // This is only TEMPORARY, UNSECURE: everyone can make bookings without paying!
+    const {tour, user, price} = req.query; // query string from success checkout
+
+    if(!tour || !user || !price) return next(); // next middleware in Home route ('/')
+
+    await Booking.create({tour, user, price});
+
+    // redirect to the url WITHOUT the query string
+    res.redirect(req.originalUrl.split('?')[0]); // remove the query string
 })
