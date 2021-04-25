@@ -21,7 +21,7 @@ const showAlert = (type, msg, time = 5) => {
 
 
 // GENERIC ALERT FUNCTION
-const alertMessage = document.querySelector('body').dataset.alert;
+const alertMessage = document.querySelector('body').dataset.alertMsg;
 
 
 if(alertMessage){
