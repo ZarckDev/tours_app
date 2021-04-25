@@ -10,6 +10,8 @@ const router = express.Router();
 // authController.isLoggedIn --> Apply the chech login to all views (TO SHOW signup or not) -- FOR NON PROTECTED ROUTES
 
 
+router.use(viewsController.alerts) // run for each request in this router
+
 //createBookingCheckout temporary, it's in "/"   route because when we success a payment booking, we are redirected to the home route, it is at this point that we register the booking in the databse
 router.get('/', authController.isLoggedIn, viewsController.getOverview)
 router.get('/tour/:name', authController.isLoggedIn, viewsController.getTour)

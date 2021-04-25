@@ -7,6 +7,17 @@ const Tour = require('../models/tourModel')
 const Booking = require('../models/bookingModel')
 
 
+// EXAMPLE OF GENERIC ALERT HANDLE -- PUT IN THE QUERY STRING (can be added to all views route if we want instead of managed by front-end JS)
+exports.alerts = (req, res, next) => {
+    const { alert } = req.query;
+    if(alert === 'booking'){ // only for booking here, as an example
+        res.locals.alert = "Your booking was successful! Please check your email for a confirmation. If your booking doesn't show up here immediately, please come back later."
+    }
+
+    next();
+}
+
+
 exports.getOverview = catchAsync(async(req, res, next) => {
     // 1) Get tour data from collection
     const tours = await Tour.find();

@@ -1,4 +1,5 @@
 
+
 const hideAlert = () => {
     const el = document.querySelector('.alert');
     if(el) el.parentElement.removeChild(el); // go trhough the parent to delete the alert
@@ -6,7 +7,7 @@ const hideAlert = () => {
 }
 
 // type is 'success' or 'error'
-const showAlert = (type, msg) => {
+const showAlert = (type, msg, time = 5) => {
     // hide the alert that exists -- in all case
     hideAlert()
 
@@ -15,5 +16,14 @@ const showAlert = (type, msg) => {
     document.querySelector('body').insertAdjacentHTML('afterbegin', markup) // inside of the body but right at the beginning
 
     // hide the alert automatically after 4s
-    window.setTimeout(hideAlert, 4000)
+    window.setTimeout(hideAlert, time * 1000)
+}
+
+
+// GENERIC ALERT FUNCTION
+const alertMessage = document.querySelector('body').dataset.alert;
+
+
+if(alertMessage){
+    showAlert('success', alertMessage, 12) //12s
 }

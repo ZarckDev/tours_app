@@ -26,7 +26,7 @@ exports.getCheckoutSession = catchAsync(async(req, res, next) => {
         payment_method_types: ['card'],
         mode: 'payment',
         // success_url: `${url}/?tour=${tourId}&user=${req.user.id}&price=${tour.price}`, // query string NOT SECURE, JUST TEMPORARY FOR LOCALHOST -- EVERYONE COULD CALL IT THROUGH THE CHECKOUT PROCESS
-        success_url: `${url}/my-tours`,
+        success_url: `${url}/my-tours?alert=booking`,
         cancel_url: `${url}/tour/${tour.slug}`,
         customer_email: req.user.email,
         client_reference_id: tourId, // pass the data from the session
