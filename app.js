@@ -27,6 +27,8 @@ const viewRouter = require('./routes/viewRoutes')
 const app = express();
 
 
+app.enable('trust proxy'); // FOR HEROKU, BECAUSE IT USES PROXY TO MODIFY REQUESTS
+
 app.set('view engine', 'pug'); // set pug as template
 app.set('views', path.join(__dirname, 'views'))
 

@@ -15,17 +15,15 @@ const signToken = id => {
     }); // sign with the user id from DB -- secret should be at least 32charac long, longer is better, as always -- I used 'randomKeygen' generator online
 }
 
-const createSendToken = (user, statusCode, res) => { // login token
+const createSendToken = (user, statusCode, req, res) => { // login token
     const token= signToken(user._id);
 
-    //store in a cookie
-    const cookieOptions ={
+    res.cookie('jwt', token, {
         expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000), // convert days to milliseconds
         httpOnly: true, // cannot be accessed or modified in any way by the Browser !! (avoid cross site scripting attacks XSS)
-    }
-    // only sent on encrypted connection (HTTPS) -- in dev we are not in HTTPS
-    if(process.env.NODE_ENV === 'production') cookieOptions.secure = true
-    res.cookie('jwt', token, cookieOptions)
+        secure: req.secure || res.headers['x-forwarded-proto'] === 'https'// only sent on encrypted connection (HTTPS) -- in dev we are not in HTTPS
+        // make sure the request in secure
+    })
 
     // just remove the password from the output.
     user.password = undefined
@@ -61,7 +59,7 @@ exports.signup = catchAsync(async(req, res, next) => { // next is for catchAsync
 
     // Only after email sent -- wait that is finished
     // Use JWT to sign in when user just created (same thing will happen when Sign In)
-    createSendToken(newUser, 201, res)
+    createSendToken(newUser, 201, req, res)
 })
 
 
@@ -82,7 +80,7 @@ exports.login = catchAsync(async(req, res, next) => {
     }
 
     // 3) If everything is ok, send token to client
-    createSendToken(user, 200, res)
+    createSendToken(user, 200, req, res)
 })
 
 
@@ -245,7 +243,7 @@ exports.resetPassword = catchAsync(async(req, res, next) => {
     // 3) update changedPasswordAt property for the user
 
     // 4) Log the user in, send JWT
-    createSendToken(foundUser, 200, res)
+    createSendToken(foundUser, 200, req, res)
 })
 
 
@@ -270,5 +268,5 @@ exports.updatePassword = catchAsync(async(req, res, next) => {
     // AND ALSO, The validator in model for passwordConfirm WILL NOT WORK (Only on save() and create())
 
     // 4) Log user in automatically, send JWT
-    createSendToken(user, 200, res) // new cookie to stay log in
+    createSendToken(user, 200, req, res) // new cookie to stay log in
 })
