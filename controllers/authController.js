@@ -206,7 +206,8 @@ exports.forgotPassword = catchAsync(async(req, res, next) => {
 
     try {
         // url for click to request a new password
-        const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}&${req.body.email}` // add email to make sure of unicity (if someone else managed to generate the same token...)
+        // const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}&${req.body.email}` // add email to make sure of unicity (if someone else managed to generate the same token...)
+        const resetURL = `${req.protocol}://${req.get('host')}/resetPassword?token=${resetToken}&email=${req.body.email}`
 
         await new Email(user, resetURL).sendPasswordReset();
 

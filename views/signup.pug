@@ -12,7 +12,7 @@ block content
                 .form__group
                     label.form__label(for='email') Email address
                     input#email.form__input(type='email', placeholder='you@example.com', required)
-                .form__group.ma-bt-md
+                .form__group
                     label.form__label(for='password') Password
                     input#password.form__input(type='password', placeholder='••••••••', required, minlength='8')
                 .form__group.ma-bt-md
@@ -20,3 +20,5 @@ block content
                     input#passwordConfirm.form__input(type='password', placeholder='••••••••', required, minlength='8')
                 .form__group
                     button.btn.btn--green.btn--register(type='submit') Register
+        p.login-text I already have an account 
+            a(href="/login") Click here

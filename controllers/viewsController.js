@@ -64,6 +64,29 @@ exports.getSignupForm = (req, res) => {
     })
 }
 
+exports.getForgotPasswordForm = (req, res) => {
+    if(!res.locals.user){ // only if no user connected we can access to this page
+        res.status(200).render('forgotPassword', {
+            title: 'Request a new password'
+        })
+    } else {
+        res.redirect('/')
+    }
+}
+
+exports.getresetPasswordForm = (req, res) => {
+    if(!res.locals.user){ // only if no user connected we can access to this page
+        const { token, email } = req.query;
+        const passwordQuery = `${token}&${email}`
+        res.status(200).render('resetPassword', {
+            title: 'Set your new password',
+            passwordQuery
+        })
+    } else {
+        res.redirect('/')
+    }
+}
+
 exports.getAccount = (req, res) => {
     // user is in locals thanks to protect middleware (findById is there)
     // available in res.locals.user from protect
