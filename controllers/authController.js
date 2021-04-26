@@ -18,12 +18,20 @@ const signToken = id => {
 const createSendToken = (user, statusCode, req, res) => { // login token
     const token= signToken(user._id);
 
-    res.cookie('jwt', token, {
-        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000), // convert days to milliseconds
-        httpOnly: true, // cannot be accessed or modified in any way by the Browser !! (avoid cross site scripting attacks XSS)
-        secure: req.secure || res.headers['x-forwarded-proto'] === 'https'// only sent on encrypted connection (HTTPS) -- in dev we are not in HTTPS
-        // make sure the request in secure
-    })
+    if(process.env.NODE_ENV === 'production')
+    {
+        res.cookie('jwt', token, {
+            expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000), // convert days to milliseconds
+            httpOnly: true, // cannot be accessed or modified in any way by the Browser !! (avoid cross site scripting attacks XSS)
+            secure: req.secure || res.headers['x-forwarded-proto'] === 'https'// only sent on encrypted connection (HTTPS) -- in dev we are not in HTTPS
+            // make sure the request in secure
+        })
+    } else {
+        res.cookie('jwt', token, {
+            expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000), // convert days to milliseconds
+            httpOnly: true, // cannot be accessed or modified in any way by the Browser !! (avoid cross site scripting attacks XSS)
+        })
+    }
 
     // just remove the password from the output.
     user.password = undefined

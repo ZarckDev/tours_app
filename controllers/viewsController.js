@@ -58,6 +58,12 @@ exports.getLoginForm = (req, res) => {
     })
 }
 
+exports.getSignupForm = (req, res) => {
+    res.status(200).render('signup', {
+        title: `Sign up`
+    })
+}
+
 exports.getAccount = (req, res) => {
     // user is in locals thanks to protect middleware (findById is there)
     // available in res.locals.user from protect
