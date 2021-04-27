@@ -90,8 +90,9 @@ exports.getresetPasswordForm = (req, res) => {
 exports.getAccount = (req, res) => {
     // user is in locals thanks to protect middleware (findById is there)
     // available in res.locals.user from protect
-    res.status(200).render('account', {
-        title: `Your account`
+    res.status(200).render('profileSettings', {
+        title: `Your account`,
+        url: req.originalUrl
     })
 }
 
@@ -108,9 +109,10 @@ exports.updateUserData = catchAsync(async(req, res, next) => {
         runValidators: true
     });
 
-    res.status(200).render('account', {
+    res.status(200).render('profileSettings', {
         title: `Your account`,
-        user: updatedUser
+        user: updatedUser,
+        url: req.originalUrl
     })
 })
 
@@ -123,8 +125,9 @@ exports.getMyTours = catchAsync(async(req, res, next) => { // or virtual populat
     const tourIds = bookings.map(el => el.tour); // et an array of tours
     const tours = await Tour.find({ _id: { $in: tourIds}}); // select all tours that have an Id which is in the tourIds array
 
-    res.status(200).render('overview', { // 'overview page, maybe change to new account view
+    res.status(200).render('myBookings', { // 'overview page, maybe change to new account view
         title: 'My Tours',
-        tours
+        tours,
+        url: req.originalUrl
     })
 })

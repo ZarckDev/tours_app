@@ -734,7 +734,7 @@ main {
   display: flex;
 }
 .user-view__menu {
-  flex: 30rem 0 0;
+  flex: 28rem 0 0;
   background-image: linear-gradient(to right bottom, var(--gradient-light), var(--gradient-dark));
   padding: 4rem 0;
 }
