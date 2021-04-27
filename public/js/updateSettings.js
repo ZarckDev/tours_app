@@ -3,6 +3,8 @@ const updateInfosForm = document.querySelector('.form-user-data')
 const updatePasswordForm = document.querySelector('.form-user-settings')
 const btnSavePassword = document.querySelector('.btn--save-password')
 const btnSaveSettings = document.querySelector('.btn--save-settings')
+const inputProfilePic = document.getElementById('photo')
+const iconNewPhoto = document.getElementById('icon-photo')
 
 // type is either 'Password' or 'Infos'
 const updateSettings = async(data, type) => {
@@ -36,9 +38,14 @@ if(updateInfosForm){
 
         await updateSettings(form, 'Infos') // axios will recognize form as an object
 
+        iconNewPhoto.style.display = 'none';
         btnSaveSettings.textContent = "Save settings"
         
         location.reload();
+    })
+
+    inputProfilePic.addEventListener('change', (event) => {
+        iconNewPhoto.style.display = 'block';
     })
 }
 if(updatePasswordForm){

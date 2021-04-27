@@ -1,35 +1,14 @@
 extends base
 
 
-mixin navItem(link, text, icon, active)
-    li(class=`${active ? 'side-nav--active' : ''}`)
-        a(href=`${link}`)
-            svg
-                use(xlink:href=`img/icons.svg#icon-${icon}`)
-            | #{text}
 
 
 
 block content 
-    main.main
+    main
         .user-view
-            nav.user-view__menu
-                ul.side-nav
-                    +navItem('#', 'Settings', 'settings', true)
-                    +navItem('/my-tours', 'My bookings', 'briefcase')
-                    +navItem('#', 'My reviews', 'star')
-                    +navItem('#', 'Billing', 'credit-card')
-                   
-                //-  ONLY if ADMIN User
-                - if (user.role === 'admin')
-                    .admin-nav
-                        h5.admin-nav__heading Admin
-                        ul.side-nav
-                            +navItem('#', 'Manage tours', 'map')
-                            +navItem('#', 'Manage users', 'users')
-                            +navItem('#', 'Manage reviews', 'star')
-                            +navItem('#', 'Manage bookings', 'briefcase')
-
+            
+            include layout/_navAccount
 
             .user-view__content
                 .user-view__form-container
@@ -50,6 +29,8 @@ block content
                             //-  all format of images
                             input.form__upload(type='file', accept='image/*', id='photo', name='photo')
                             label(for='photo') Choose new photo
+                            svg#icon-photo
+                                use(xlink:href='/img/icons.svg#icon-check-circle')
                         .form__group.right
                             button.btn.btn--small.btn--green.btn--save-settings(type='submit') Save settings
                 .line &nbsp;

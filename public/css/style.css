@@ -1,15 +1,17 @@
 :root {
   --section-rotate: 9vw;
   --main-color: #55c57a;
-  --light-color: #fff;
+  --white-color: #fff;
   --grey-color: #555;
   --light-grey: #f7f7f7;
+  --gradient-dark: #28b487;
+  --gradient-light: #7dd56f;
 }
 
 
 ::selection {
   background-color: var(--main-color);
-  color: var(--light-color);
+  color: var(--white-color);
 }
 
 *,
@@ -32,11 +34,15 @@ body {
   color: var(--grey-color);
   padding: 3rem;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.section-overview {
+main {
   background-color: var(--light-grey);
   padding: 8rem 6rem;
+  flex: 1;
+  position: relative;
 }
 
 
@@ -44,10 +50,7 @@ body {
   grid-row: 1 / -1;
 }
 
-.container {
-  max-width: 120rem;
-  margin: 0 auto;
-}
+
 
 .ma-bt-md {
   margin-bottom: 3rem !important;
@@ -64,7 +67,7 @@ body {
 .line {
   margin: 6rem 0;
   width: 100%;
-  height: 1px;
+  height: 2px;
   background-color: #e0e0e0;
 }
 
@@ -75,7 +78,7 @@ body {
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
   z-index: 9999;
-  color: #fff;
+  color: var(--white-color);
   font-size: 1.8rem;
   font-weight: 400;
   text-align: center;
@@ -96,7 +99,7 @@ body {
   font-size: 2.25rem;
   text-transform: uppercase;
   font-weight: 600;
-  background-image: linear-gradient(to right, #7dd56f, #28b487);
+  background-image: linear-gradient(to right, var(--gradient-light), var(--gradient-dark));
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -731,17 +734,8 @@ body {
   display: flex;
 }
 .user-view__menu {
-  -webkit-box-flex: 32rem;
-  -ms-flex: 32rem 0 0px;
-  flex: 32rem 0 0;
-  background-image: -webkit-gradient(
-    linear,
-    left top,
-    right bottom,
-    from(#7dd56f),
-    to(#28b487)
-  );
-  background-image: linear-gradient(to right bottom, #7dd56f, #28b487);
+  flex: 30rem 0 0;
+  background-image: linear-gradient(to right bottom, var(--gradient-light), var(--gradient-dark));
   padding: 4rem 0;
 }
 .user-view__content {
@@ -754,6 +748,14 @@ body {
   max-width: 68rem;
   margin: 0 auto;
   padding: 0 8rem;
+}
+
+#icon-photo {
+  height: 2rem;
+  width: 2rem;
+  fill: var(--main-color);
+  margin-left: 2rem;
+  display: none;
 }
 
 .footer {
