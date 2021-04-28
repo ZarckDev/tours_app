@@ -1308,12 +1308,14 @@ main {
 }
 
 .booking__img {
-  height: 8rem;
+  height: 10rem;
 }
 
+.booking__icon .card__data{
+  padding: 0.5rem 0;
+}
 
-
-#icon-booking {
+#icon-detail {
   height: 3rem;
   width: 3rem;
   fill: var(--main-color);

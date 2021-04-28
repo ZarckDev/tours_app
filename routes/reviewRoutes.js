@@ -2,6 +2,7 @@ const express = require ('express')
 
 const reviewController = require('../controllers/reviewController')
 const authController = require('../controllers/authController');
+const bookingController = require('../controllers/bookingController');
 
 
 const router = express.Router({ mergeParams: true }); // get the params from URL defined previously (in tourRoutes for :tourId access)
@@ -21,6 +22,7 @@ router.route('/') ///api/v1/tours/:tourId/reviews
     .post( 
         authController.restrictTo('user'), // only user can post a review
         reviewController.setTourUserIds,  // for nested routes with tour Id or not
+        bookingController.isBookedByUser,// Create review only for user that booked the tour
         reviewController.createReview) 
 
     // setTourUserIds to get the tour id and the user id whether it's in the body or in the params URL
