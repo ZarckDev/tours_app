@@ -511,9 +511,13 @@ main {
   max-width: 25rem;
 }
 
+.mapboxgl-popup-tip {
+  border-bottom-color: var(--light-grey) !important;
+}
 .mapboxgl-popup-content {
   text-align: center;
   font-family: 'Poppins', sans-serif;
+  background-color: var(--light-grey) !important;
   padding: 1.5rem !important;
   font-size: 1.4rem;
   -webkit-box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
@@ -550,6 +554,29 @@ main {
   -ms-scroll-snap-type: x mandatory;
   scroll-snap-type: x mandatory;
 }
+.reviews::-webkit-scrollbar {
+  width: 1rem;
+  background: transparent;
+}
+ 
+.reviews::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+}
+ 
+.reviews::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right bottom, var(--gradient-dark), var(--gradient-light));
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+}
+
 .reviews__card {
   width: 30rem;
   padding: 4rem;
