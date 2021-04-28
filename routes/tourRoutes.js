@@ -4,6 +4,7 @@ const tourController = require('../controllers/tourController')
 const authController = require('../controllers/authController');
 
 const reviewRouter = require('../routes/reviewRoutes');
+const bookingRouter = require('../routes/bookingRoutes');
 
 const router = express.Router(); // It's a middleware that is executed before the .get() and others
 
@@ -18,7 +19,8 @@ const router = express.Router(); // It's a middleware that is executed before th
 // reviews
 router.use('/:tourId/reviews', reviewRouter) // use the review Router in case of this url
 //  /api/v1/tours/:tourId/reviews
-
+router.use('/:tourId/bookings', bookingRouter) // for all bookings of specific tour
+//  /api/v1/tours/:tourId/bookings
 
 
 // ROUTES FOR SPECIFIC API REQUESTS

@@ -4,9 +4,12 @@ const express = require('express');
 const userController = require('../controllers/userController')
 const authController = require('../controllers/authController')
 
+const bookingRouter = require('../routes/bookingRoutes');
 
 
 const router = express.Router(); // It's a middleware
+
+
 
 // ROUTES FOR AUTH
 router.post('/signup', authController.signup)
@@ -32,6 +35,9 @@ router.delete('/deleteMe', userController.deleteMe)
 
 // Restrict all following routes to ADMIN
 router.use(authController.restrictTo('admin'))
+
+router.use('/:userId/bookings', bookingRouter) // for all bookings of specific tour
+//  /api/v1/users/:userId/bookings
 
 //routes
 router.route('/')

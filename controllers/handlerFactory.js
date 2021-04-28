@@ -108,8 +108,10 @@ exports.getAll = Model =>
 
         // To allow for nested GET reviews on tour (small hack for Get All Reviews)
         let filter = {}
-        // In case we want all the reviews, but for a specific Tour
+        // In case we want all the reviews/bookings, but for a specific Tour
         if(req.params.tourId) filter = { tour: req.params.tourId}; // from url
+        // In case we want all the reviews/bookings, but for a specific User
+        if(req.params.userId) filter = { user: req.params.userId}; // from url
         // otherwise find all reviews
 
         // EXECUTE QUERY
@@ -130,3 +132,4 @@ exports.getAll = Model =>
         })
 
     })
+

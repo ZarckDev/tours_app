@@ -101,6 +101,16 @@ exports.webhookCheckout = (req, res, next) => {
 }
 
 
+exports.setTourUserIds = (req, res, next) => {
+    if(req.params.tourId){
+        if(!req.body.tour) req.body.tour = req.params.tourId; // from url
+        if(!req.body.user) req.body.user = req.user.id; // access to user because we are logged in at this point
+    } else if(req.params.userId){
+        req.body.user = req.params.userId;
+    }
+    
+    next();
+}
 
 // API
 exports.createBooking = factory.createOne(Booking);
