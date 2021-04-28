@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 
+const Booking = require('./bookingModel');
 const Tour = require('./tourModel');
+
+const AppError = require('../utils/appError');
 
 
 const reviewSchema = new mongoose.Schema({
@@ -95,6 +98,22 @@ reviewSchema.post('save', function() {
     
     this.constructor.calcAverageRatings(this.tour) // constructor is the Model of this current document - because calcAverageRatings is a method of the Model
 })
+
+reviewSchema.pre('save', async function (next) {
+	const checkBooking = await Booking.findOne({
+		user: this.user,
+		tour: this.tour,
+	});
+	if (!checkBooking)
+		return next(
+			new AppError(
+				'You must first purchase this tour to leave a review!',
+				403
+			)
+		);
+ 
+	next();
+});
 
 
 // On findByIdAndUpdate

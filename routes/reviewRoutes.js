@@ -22,7 +22,7 @@ router.route('/') ///api/v1/tours/:tourId/reviews
     .post( 
         authController.restrictTo('user'), // only user can post a review
         reviewController.setTourUserIds,  // for nested routes with tour Id or not
-        bookingController.isBookedByUser,// Create review only for user that booked the tour
+        // Create review only for user that booked the tour -- pre('save') better than middleware
         reviewController.createReview) 
 
     // setTourUserIds to get the tour id and the user id whether it's in the body or in the params URL

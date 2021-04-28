@@ -101,18 +101,6 @@ exports.webhookCheckout = (req, res, next) => {
 }
 
 
-exports.isBookedByUser = catchAsync(async(req, res, next) => {
-    const userId = req.body.user; //  from setTourUserIds
-    const tourId = req.body.tour; // from setTourUserIds
-
-    const booking = await Booking.find({ user: userId, tour: tourId })
-
-    if(booking.length === 0){
-        return next(new AppError('You cannot review a tour that you did not booked', 400))
-    }
-    
-    next();
-})
 
 // API
 exports.createBooking = factory.createOne(Booking);
