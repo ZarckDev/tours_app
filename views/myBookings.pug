@@ -1,4 +1,15 @@
 extends account
 
 block userContent
-    h1= url
+    .booking-container
+        each tour in tours
+            .booking__card
+                img.booking__img(src=`/img/tours/${tour.imageCover}`, alt=`${tour.name}`)
+                h2= `${tour.name} tour`
+                .card__data
+                    svg.card__icon
+                        use(xlink:href='/img/icons.svg#icon-calendar')
+                    span= tour.startDates[0].toLocaleString('en-us', {month: 'long', year: 'numeric'})
+                a.booking__link(href=href=`/tour/${tour.slug}`)
+                    svg#icon-booking
+                        use(xlink:href='/img/icons.svg#icon-chevron-right') 
