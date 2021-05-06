@@ -3,6 +3,7 @@
 // dataset.locations for "data-locations"
 const locations = JSON.parse(document.getElementById('map').dataset.locations);
 
+//Set your own Mapbox token here for your own map
 mapboxgl.accessToken = 'pk.eyJ1IjoiemFyY2siLCJhIjoiY2ttbnRtd2NnMGt3ZjJucGVhb3I1b3dwbSJ9.iMpPMIlYT92ZGx7nQ2jqbQ';
 
 var map = new mapboxgl.Map({
